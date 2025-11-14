@@ -69,6 +69,9 @@ def create_app() -> Flask:
     else:
         frontend_origins = [os.environ.get('FRONTEND_ORIGIN', 'http://localhost:3000')]
 
+    # Log the configured origins for debugging
+    print(f"[HOPON] CORS configured for origins: {frontend_origins}", flush=True)
+
     # Configure CORS to allow the configured frontend origins and allow credentials
     CORS(app, supports_credentials=True, resources={r"/*": {"origins": frontend_origins}})
 
