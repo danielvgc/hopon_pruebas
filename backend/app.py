@@ -299,7 +299,6 @@ def create_app() -> Flask:
                 dev_redirect = url_for('google_dev', _external=True)
                 return redirect(dev_redirect)
             return jsonify({'error': 'Google OAuth is not configured. Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET or enable DEV_GOOGLE_LOGIN for local testing.'}), 500
-        redirect_uri = url_for("google_callback", _external=True)
         # The frontend should pass its origin as the `next` param (e.g. window.location.origin)
         next_url = request.args.get('next')
         next_origin = None
@@ -315,6 +314,9 @@ def create_app() -> Flask:
                 next_origin = None
 
         session['oauth_next'] = next_origin or frontend_origins[0]
+        # Use the configured GOOGLE_REDIRECT_URI from environment (not auto-generated URL)
+        # to ensure it matches what's registered in Google Cloud Console
+        redirect_uri = app.config['GOOGLE_REDIRECT_URI']
         return client.authorize_redirect(redirect_uri)
 
     @app.get("/auth/google/callback")
