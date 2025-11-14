@@ -34,21 +34,28 @@ This guide explains how to deploy HopOn to public hosting so users can access it
 
 ### 1b. Add Environment Variables
 
-Before deploying, add these env vars in the **Environment** section of Render:
+Before deploying, add these env vars in the **Environment** section of Render. Copy and paste the **exact values** below:
 
-| Key | Value | Notes |
-|-----|-------|-------|
-| `ENV` | `production` | Signals prod mode |
-| `SECRET_KEY` | (generate a random 32+ char string) | `openssl rand -hex 32` |
-| `JWT_SECRET` | (generate a random 32+ char string) | `openssl rand -hex 32` |
-| `GOOGLE_CLIENT_ID` | (your Google OAuth client ID) | [See step 4](#step-4-optional-google-oauth) |
-| `GOOGLE_CLIENT_SECRET` | (your Google OAuth secret) | [See step 4](#step-4-optional-google-oauth) |
-| `GOOGLE_REDIRECT_URI` | `https://<backend-url>/auth/google/callback` | Replace with actual Render URL (e.g., https://hopon-backend.onrender.com/auth/google/callback) |
-| `FRONTEND_ORIGINS` | `https://<frontend-url>` | Replace with Vercel URL (e.g., https://hopon.vercel.app) |
-| `SESSION_COOKIE_SECURE` | `true` | Enforce HTTPS-only cookies |
-| `SESSION_COOKIE_SAMESITE` | `Lax` | CSRF protection |
-| `DATABASE_URL` | (auto-created by Render Postgres) | See step 1c |
-| `DEV_GOOGLE_LOGIN` | `false` | Disable dev fallback in production |
+```
+ENV=production
+SECRET_KEY=02bba7bd8878464da6a261e8a9cdd3e4968e4fafc28c0304d99bd34854f01b11
+JWT_SECRET=bffae3481c5fcd793e4554601e77315802ed270ca75bf12b3d171b97397c95e6
+GOOGLE_CLIENT_ID=[Your OAuth Client ID - see Step 4]
+GOOGLE_CLIENT_SECRET=[Your OAuth Client Secret - see Step 4]
+GOOGLE_REDIRECT_URI=https://hopon-backend.onrender.com/auth/google/callback
+FRONTEND_ORIGINS=https://hopon.vercel.app
+SESSION_COOKIE_SECURE=true
+SESSION_COOKIE_SAMESITE=Lax
+DATABASE_URL=[Paste the Internal Database URL from step 1c]
+DEV_GOOGLE_LOGIN=false
+```
+
+**How to enter these in Render:**
+1. Go to your Web Service dashboard on Render
+2. Click **Environment** (in the left sidebar)
+3. For each variable above, click **Add Environment Variable**
+4. Paste the exact key and value
+5. When you see the checkmark, it's saved
 
 ### 1c. Add PostgreSQL
 
@@ -90,10 +97,12 @@ After linking, before final deploy:
 
 1. Go to your project settings in Vercel
 2. Navigate to **Settings** → **Environment Variables**
-3. Add this key-value pair:
+3. Add this exact key-value pair:
    - **Key**: `NEXT_PUBLIC_API_BASE_URL`
-   - **Value**: `https://hopon-backend.onrender.com` (or your actual Render backend URL)
+   - **Value**: `https://hopon-backend.onrender.com`
 4. Click **Save**
+
+**Note**: The value `https://hopon-backend.onrender.com` is the default Render backend URL. If Render gives your backend a different URL, replace it with that URL.
 
 ### 2c. Redeploy
 
@@ -142,13 +151,19 @@ To enable real Google sign-in (instead of dev fallback):
 
 ### 4b. Add to Render
 
-In your backend's Render environment variables, add these (Google OAuth credentials provided separately):
-- `GOOGLE_CLIENT_ID`: [Your OAuth Client ID]
-- `GOOGLE_CLIENT_SECRET`: [Your OAuth Client Secret]
-- `GOOGLE_REDIRECT_URI`: `https://hopon-backend.onrender.com/auth/google/callback`
-- `DEV_GOOGLE_LOGIN`: `false`
+After you create the Google OAuth app (step 4a), you'll have a **Client ID** and **Client Secret**. 
 
-**Important**: Enter Google OAuth credentials directly in Render dashboard. Never commit them to Git.
+Go back to your Render backend service and add these two variables in the **Environment** section:
+
+**Key**: `GOOGLE_CLIENT_ID`  
+**Value**: `[Paste your Client ID from Google Cloud Console here]`
+
+**Key**: `GOOGLE_CLIENT_SECRET`  
+**Value**: `[Paste your Client Secret from Google Cloud Console here]`
+
+The other OAuth vars (`GOOGLE_REDIRECT_URI` and `DEV_GOOGLE_LOGIN`) were already set in step 1b.
+
+**⚠️ Important**: Enter Google OAuth credentials directly in Render dashboard. Never commit them to Git.
 
 ### 4c. Retest
 
