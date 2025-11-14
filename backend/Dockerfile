@@ -18,16 +18,10 @@ COPY models.py ./
 # Copy everything else from the backend context
 COPY . ./
 
-# Install Python dependencies (including gunicorn for production)
-RUN pip install --no-cache-dir \
-    Flask==3.0.3 \
-    Flask-SQLAlchemy==3.1.1 \
-    Flask-CORS==4.0.0 \
-    python-dotenv==1.0.0 \
-    Authlib==1.3.2 \
-    PyJWT==2.9.0 \
-    requests==2.31.0 \
-    gunicorn==20.1.0
+
+# Install all Python dependencies from pyproject.toml (including psycopg2 and gunicorn)
+RUN pip install --upgrade pip setuptools
+RUN pip install .
 
 # Expose port
 EXPOSE 8000
