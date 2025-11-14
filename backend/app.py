@@ -43,10 +43,13 @@ def create_app() -> Flask:
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key')
     app.config['GOOGLE_CLIENT_ID'] = os.environ.get('GOOGLE_CLIENT_ID')
     app.config['GOOGLE_CLIENT_SECRET'] = os.environ.get('GOOGLE_CLIENT_SECRET')
-    app.config['GOOGLE_REDIRECT_URI'] = os.environ.get(
-        'GOOGLE_REDIRECT_URI',
-        'http://localhost:8000/auth/google/callback',
-    )
+    
+    # In production, enforce that GOOGLE_REDIRECT_URI is explicitly set
+    default_redirect_uri = 'http://localhost:8000/auth/google/callback' if os.environ.get('ENV', 'development') == 'development' else None
+    google_redirect_uri = os.environ.get('GOOGLE_REDIRECT_URI', default_redirect_uri)
+    if not google_redirect_uri:
+        raise RuntimeError("GOOGLE_REDIRECT_URI environment variable is required in production. Set it to https://your-render-url.onrender.com/auth/google/callback")
+    app.config['GOOGLE_REDIRECT_URI'] = google_redirect_uri
     # Enable a development-only Google login flow when real Google OAuth
     # credentials are not available. This lets developers test the popup
     # auth flow locally without registering an OAuth app.
