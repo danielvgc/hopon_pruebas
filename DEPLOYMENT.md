@@ -23,7 +23,7 @@ This guide explains how to deploy HopOn to public hosting so users can access it
 1. Go to https://dashboard.render.com
 2. Click **New +** → **Web Service**
 3. Select **Deploy an existing repository** → Connect your GitHub account and select the HopOn repo
-4. Fill in the form:
+4. Fill in the ok, first i want to push all this project to a private repository i have created which is: https://github.com/danielvgc/hopon_pruebas.git. how should i do it or if you can do it is betterform:
    - **Name**: `hopon-backend` (or your choice)
    - **Environment**: `Docker`
    - **Region**: Choose closest to you or users (e.g., US, EU)
@@ -142,11 +142,13 @@ To enable real Google sign-in (instead of dev fallback):
 
 ### 4b. Add to Render
 
-In your backend's Render environment variables:
-- `GOOGLE_CLIENT_ID`: Paste your client ID
-- `GOOGLE_CLIENT_SECRET`: Paste your secret
+In your backend's Render environment variables, add these (Google OAuth credentials provided separately):
+- `GOOGLE_CLIENT_ID`: [Your OAuth Client ID]
+- `GOOGLE_CLIENT_SECRET`: [Your OAuth Client Secret]
 - `GOOGLE_REDIRECT_URI`: `https://hopon-backend.onrender.com/auth/google/callback`
-- Set `DEV_GOOGLE_LOGIN`: `false`
+- `DEV_GOOGLE_LOGIN`: `false`
+
+**Important**: Enter Google OAuth credentials directly in Render dashboard. Never commit them to Git.
 
 ### 4c. Retest
 
