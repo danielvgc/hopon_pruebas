@@ -69,13 +69,20 @@ DATABASE_URL = (paste the Internal Database URL from step 1.2)
 - [ ] **STOP** before clicking Deploy
 
 #### 2.2 Add Environment Variable
-- [ ] Click **Settings** (appears before Deploy)
-- [ ] Go to **Environment Variables**
-- [ ] Add:
+- [x] Click **Settings** (appears before Deploy)
+- [x] Go to **Environment Variables**
+- [x] Add:
   - **Key**: `NEXT_PUBLIC_API_BASE_URL`
   - **Value**: `https://hopon-backend.onrender.com`
-- [ ] Click **Add**
-- [ ] Now click **Deploy**
+- [x] Click **Add**
+- [x] Now click **Deploy**
+
+**If you haven't set this variable yet or events aren't loading:**
+1. Go to https://vercel.com/dashboard
+2. Select the **hopon** project
+3. Go to **Settings** → **Environment Variables**
+4. Add the variable above if missing
+5. Go to **Deployments** → find latest → click three-dot menu → **Redeploy**
 
 #### 2.3 Wait for Deployment
 - [ ] Vercel deploys automatically
