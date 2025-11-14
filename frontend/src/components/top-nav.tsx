@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Home, Search, Plus, CalendarDays, User } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -22,8 +23,16 @@ export default function TopNav() {
   return (
     <div className="sticky top-0 z-50 border-b border-neutral-800 bg-neutral-950/80 backdrop-blur">
       <div className="mx-auto flex max-w-screen-2xl items-center justify-between px-6 py-4">
-        <Link href="/home" className="text-xl font-semibold">
-          HopOn
+        <Link href="/home" className="flex items-center gap-2 hover:opacity-80 transition">
+          <Image 
+            src="/logo.png" 
+            alt="HopOn Logo" 
+            width={32} 
+            height={32} 
+            className="h-8 w-8"
+            priority
+          />
+          <span className="hidden sm:inline text-xl font-semibold">HopOn</span>
         </Link>
         <div className="flex items-center gap-3">
           {nav.map((item) => {

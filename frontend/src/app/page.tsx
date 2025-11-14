@@ -1,15 +1,23 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 
 export default function LandingPage() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-neutral-950 via-neutral-950 to-red-950/10 px-6 py-12 text-neutral-100">
       <div className="mx-auto max-w-2xl text-center space-y-8">
         {/* Logo/Branding */}
-        <div className="space-y-2">
-          <div className="text-5xl font-extrabold bg-gradient-to-r from-red-400 via-red-500 to-red-600 bg-clip-text text-transparent">
-            HopOn
+        <div className="space-y-4">
+          <div className="flex justify-center">
+            <Image 
+              src="/logo.png" 
+              alt="HopOn Logo" 
+              width={120} 
+              height={120} 
+              className="h-24 w-24"
+              priority
+            />
           </div>
           <p className="text-sm font-semibold text-neutral-300">Find your next game</p>
         </div>
