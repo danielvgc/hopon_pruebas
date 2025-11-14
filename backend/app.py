@@ -301,7 +301,7 @@ def create_app() -> Flask:
             return jsonify({'error': 'Google OAuth is not configured. Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET or enable DEV_GOOGLE_LOGIN for local testing.'}), 500
         # The frontend should pass its origin as the `next` param (e.g. window.location.origin)
         next_url = request.args.get('next')
-        next_origin = None
+        next_origin = frontend_origins[0]  # Default to first allowed origin
         if isinstance(next_url, str):
             try:
                 from urllib.parse import urlparse
@@ -311,9 +311,10 @@ def create_app() -> Flask:
                 if candidate_origin in frontend_origins:
                     next_origin = candidate_origin
             except Exception:
-                next_origin = None
+                pass
 
-        session['oauth_next'] = next_origin or frontend_origins[0]
+        # Store the next URL in the session for the callback to retrieve
+        session['oauth_next'] = next_origin
         # Use the configured GOOGLE_REDIRECT_URI from environment (not auto-generated URL)
         # to ensure it matches what's registered in Google Cloud Console
         redirect_uri = app.config['GOOGLE_REDIRECT_URI']
@@ -380,8 +381,9 @@ def create_app() -> Flask:
         if redirect_target not in frontend_origins:
             redirect_target = frontend_origins[0]
 
-        # Escape quotes in JSON payload for embedding in HTML
-        payload_json = json.dumps(payload).replace('"', '\\"')
+        # Properly escape JSON for embedding in HTML using JSON string
+        import html
+        payload_json = json.dumps(payload)
         
         script = f"""<!DOCTYPE html>
 <html lang="en">
@@ -392,13 +394,14 @@ def create_app() -> Flask:
   <body>
     <script>
       (function() {{
-        const payload = JSON.parse("{payload_json}");
+        const payload = {payload_json};
+        console.log('Received payload:', payload);
         if (window.opener && window.opener !== window) {{
-            // Post message to the frontend origin we validated earlier.
+            console.log('Posting message to opener');
             window.opener.postMessage({{ type: "hopon:auth", payload: payload }}, "*");
-            window.close();
+            setTimeout(() => {{ window.close(); }}, 100);
         }} else {{
-            // Fallback: store in localStorage and redirect
+            console.log('No opener, redirecting to: {redirect_target}');
             window.localStorage.setItem("hoponAuthPayload", JSON.stringify(payload));
             window.location.replace("{redirect_target}");
         }}
