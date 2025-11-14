@@ -17,7 +17,13 @@ export const metadata: Metadata = {
   title: "HopOn - Find Pickup Games Nearby",
   description: "Find pickup games nearby, connect with players, and keep your schedule in sync.",
   icons: {
-    icon: "/logo.png",
+    icon: [
+      {
+        url: "/logo.png",
+        sizes: "1024x1024",
+        type: "image/png",
+      },
+    ],
   },
 };
 
