@@ -155,6 +155,20 @@ export const Api = {
       body: JSON.stringify(payload),
     });
   },
+  async setupAccount(payload: { username: string; bio?: string; location?: string | null; sports?: string[] }) {
+    return http<{ message: string; user: HopOnUser }>(`/auth/setup-account`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+  },
+  async checkUsernameAvailable(username: string) {
+    return http<{ available: boolean; message?: string }>(
+      `/auth/username-available?username=${encodeURIComponent(username)}`,
+      {
+        method: "GET",
+      }
+    );
+  },
   async nearbyEvents(params?: { lat?: number; lng?: number }) {
     const query = params?.lat && params?.lng ? `?lat=${params.lat}&lng=${params.lng}` : "";
     return http<HopOnEvent[]>(`/events/nearby${query}`);

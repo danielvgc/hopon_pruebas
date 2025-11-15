@@ -647,6 +647,7 @@ def create_app() -> Flask:
                 'message': 'Signup successful',
                 'user': user.to_dict(),
                 'access_token': access_token,
+                'needs_username_setup': True,  # Email signup requires full profile setup
             })
             response.set_cookie(
                 'refresh_token',
@@ -850,6 +851,68 @@ def create_app() -> Flask:
         except Exception as e:
             db.session.rollback()
             return jsonify({'error': 'Failed to update profile'}), 500
+
+    @app.post("/auth/setup-account")
+    def setup_account():
+        """Complete account setup after initial signup. Requires authentication."""
+        if not g.current_user:
+            return jsonify({'error': 'Authentication required'}), 401
+        
+        data = request.get_json(silent=True) or {}
+        user = g.current_user
+        
+        # Validate required fields
+        username = (data.get('username') or '').strip()
+        if not username:
+            return jsonify({'error': 'Username is required'}), 400
+        
+        if len(username) < 3:
+            return jsonify({'error': 'Username must be at least 3 characters'}), 400
+        
+        if len(username) > 50:
+            return jsonify({'error': 'Username must be at most 50 characters'}), 400
+        
+        # Check if username is available (or is same as current)
+        if username != user.username:
+            existing = User.query.filter_by(username=username).first()
+            if existing:
+                return jsonify({'error': 'Username already taken'}), 409
+        
+        user.username = username
+        
+        # Update bio (optional)
+        if 'bio' in data:
+            user.bio = data.get('bio') or None
+        
+        # Update location (optional)
+        if 'location' in data:
+            user.location = data.get('location') or None
+        
+        # Update sports (optional)
+        if 'sports' in data:
+            sports_data = data.get('sports')
+            if sports_data:
+                if isinstance(sports_data, list):
+                    user.sports = ', '.join(sports_data)
+                else:
+                    user.sports = sports_data
+            else:
+                user.sports = None
+        
+        try:
+            db.session.commit()
+            print(f"[HOPON] Account setup completed for user: {user.username} (ID: {user.id})", flush=True)
+            return jsonify({
+                'message': 'Account setup completed successfully',
+                'user': user.to_dict()
+            }), 200
+        except IntegrityError as e:
+            db.session.rollback()
+            return jsonify({'error': 'Failed to setup account'}), 409
+        except Exception as e:
+            db.session.rollback()
+            print(f"[HOPON] Error setting up account: {str(e)}", flush=True)
+            return jsonify({'error': 'Failed to setup account'}), 500
 
     # Event Management
     # Utility
