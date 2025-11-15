@@ -264,12 +264,12 @@ export default function DiscoverPage() {
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           placeholder="Search players, sports, locations..."
-          className="w-full rounded-2xl border border-neutral-800 bg-neutral-900/60 px-4 py-3 pl-11 text-neutral-100 placeholder:text-neutral-500"
+          className="w-full rounded-lg sm:rounded-2xl border border-neutral-800 bg-neutral-900/60 px-3 sm:px-4 py-2 sm:py-3 pl-9 sm:pl-11 text-xs sm:text-sm text-neutral-100 placeholder:text-neutral-500"
         />
-        <Search className="absolute left-3 top-1/2 size-5 -translate-y-1/2 text-neutral-500" />
+        <Search className="absolute left-3 top-1/2 size-4 sm:size-5 -translate-y-1/2 text-neutral-500" />
       </div>
 
-      <div className="mt-4 flex flex-wrap gap-2 pb-2">
+      <div className="mt-3 sm:mt-4 flex flex-wrap gap-1.5 sm:gap-2 pb-2">
         {filters.map((chip) => {
           const isActive = chip === activeFilter;
           return (
@@ -279,8 +279,8 @@ export default function DiscoverPage() {
               onClick={() => setActiveFilter(chip)}
               className={
                 isActive
-                  ? "rounded-full bg-red-500 px-4 py-2 text-sm font-semibold text-white"
-                  : "rounded-full border border-neutral-800 bg-neutral-900/60 px-4 py-2 text-sm text-neutral-200 hover:border-neutral-700 hover:text-white"
+                  ? "rounded-full bg-red-500 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold text-white"
+                  : "rounded-full border border-neutral-800 bg-neutral-900/60 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm text-neutral-200 hover:border-neutral-700 hover:text-white"
               }
             >
               {chip}
@@ -289,18 +289,18 @@ export default function DiscoverPage() {
         })}
       </div>
 
-      <div className="mt-6 space-y-10 pb-10">
+      <div className="mt-4 sm:mt-6 space-y-6 sm:space-y-10 pb-10">
         <section>
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-xl font-semibold">Players</h2>
-            <span className="text-sm text-neutral-400">{filteredPlayers.length} result(s)</span>
+          <div className="mb-2 sm:mb-3 flex items-center justify-between">
+            <h2 className="text-base sm:text-xl font-semibold">Players</h2>
+            <span className="text-xs sm:text-sm text-neutral-400">{filteredPlayers.length} result(s)</span>
           </div>
           {filteredPlayers.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-neutral-800 bg-neutral-900/40 px-6 py-8 text-center text-sm text-neutral-400">
+            <div className="rounded-lg sm:rounded-2xl border border-dashed border-neutral-800 bg-neutral-900/40 px-4 sm:px-6 py-6 sm:py-8 text-center text-xs sm:text-sm text-neutral-400">
               No players match the current filters. Try a different sport or search term.
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <div className="grid grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-2">
               {filteredPlayers.map((player) => (
                 <UserCard
                   key={player.id}
@@ -322,16 +322,16 @@ export default function DiscoverPage() {
         </section>
 
         <section>
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-xl font-semibold">Games & Events</h2>
-            <span className="text-sm text-neutral-400">{filteredEvents.length} result(s)</span>
+          <div className="mb-2 sm:mb-3 flex items-center justify-between">
+            <h2 className="text-base sm:text-xl font-semibold">Games & Events</h2>
+            <span className="text-xs sm:text-sm text-neutral-400">{filteredEvents.length} result(s)</span>
           </div>
           {filteredEvents.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-neutral-800 bg-neutral-900/40 px-6 py-8 text-center text-sm text-neutral-400">
+            <div className="rounded-lg sm:rounded-2xl border border-dashed border-neutral-800 bg-neutral-900/40 px-4 sm:px-6 py-6 sm:py-8 text-center text-xs sm:text-sm text-neutral-400">
               No events match the current filters. Try adjusting your sport or search criteria.
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <div className="grid grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-2">
               {filteredEvents.map((event) => (
                 <EventCard
                   key={event.id}

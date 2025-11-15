@@ -43,12 +43,12 @@ export default function CreatePage() {
 
   return (
     <WebLayout title="Create Event">
-      <form onSubmit={onSubmit} className="space-y-4">
+      <form onSubmit={onSubmit} className="max-w-2xl mx-auto space-y-3 sm:space-y-4">
         <Field label="Event Name">
           <input
             value={form.name}
             onChange={(e) => update("name", e.target.value)}
-            className="w-full rounded-xl border border-neutral-800 bg-neutral-900/60 px-4 py-3"
+            className="w-full rounded-lg sm:rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm"
             required
           />
         </Field>
@@ -56,7 +56,7 @@ export default function CreatePage() {
           <select
             value={form.sport}
             onChange={(e) => update("sport", e.target.value)}
-            className="w-full rounded-xl border border-neutral-800 bg-neutral-900/60 px-4 py-3"
+            className="w-full rounded-lg sm:rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm"
           >
             {['Basketball','Tennis','Badminton','Soccer'].map((s) => (
               <option key={s} value={s}>
@@ -69,7 +69,7 @@ export default function CreatePage() {
           <input
             value={form.location}
             onChange={(e) => update("location", e.target.value)}
-            className="w-full rounded-xl border border-neutral-800 bg-neutral-900/60 px-4 py-3"
+            className="w-full rounded-lg sm:rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm"
             placeholder="Venue or address"
             required
           />
@@ -79,7 +79,7 @@ export default function CreatePage() {
             type="datetime-local"
             value={form.event_date}
             onChange={(e) => update("event_date", e.target.value)}
-            className="w-full rounded-xl border border-neutral-800 bg-neutral-900/60 px-4 py-3"
+            className="w-full rounded-lg sm:rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm"
           />
         </Field>
         <Field label="Max Players">
@@ -88,14 +88,14 @@ export default function CreatePage() {
             min={2}
             value={form.max_players}
             onChange={(e) => update("max_players", parseInt(e.target.value || "0", 10))}
-            className="w-full rounded-xl border border-neutral-800 bg-neutral-900/60 px-4 py-3"
+            className="w-full rounded-lg sm:rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm"
           />
         </Field>
         <Field label="Level">
           <select
             value={form.skill_level}
             onChange={(e) => update("skill_level", e.target.value)}
-            className="w-full rounded-xl border border-neutral-800 bg-neutral-900/60 px-4 py-3"
+            className="w-full rounded-lg sm:rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm"
           >
             {['Beginner','Intermediate','Advanced'].map((s) => (
               <option key={s} value={s}>
@@ -108,18 +108,18 @@ export default function CreatePage() {
           <textarea
             value={form.notes}
             onChange={(e) => update("notes", e.target.value)}
-            className="w-full rounded-xl border border-neutral-800 bg-neutral-900/60 px-4 py-3"
-            rows={4}
+            className="w-full rounded-lg sm:rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm"
+            rows={3}
             placeholder="Share extra details, gear requirements, or meetup instructions."
           />
         </Field>
         <button
           type="submit"
-          className="w-full rounded-xl bg-red-500 px-4 py-3 font-semibold text-white hover:bg-red-400"
+          className="w-full rounded-lg sm:rounded-xl bg-red-500 px-4 py-2 sm:py-3 font-semibold text-white hover:bg-red-400 text-sm sm:text-base"
         >
           Create
         </button>
-        {result && <p className="text-center text-sm text-neutral-300">{result}</p>}
+        {result && <p className="text-center text-xs sm:text-sm text-neutral-300">{result}</p>}
       </form>
     </WebLayout>
   );
@@ -128,7 +128,7 @@ export default function CreatePage() {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <div className="mb-1 text-sm text-neutral-300">{label}</div>
+      <div className="mb-1 sm:mb-2 text-xs sm:text-sm text-neutral-300 font-medium">{label}</div>
       {children}
     </label>
   );

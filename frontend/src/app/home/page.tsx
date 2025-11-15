@@ -149,25 +149,25 @@ export default function HomePage() {
   return (
     <WebLayout>
       {/* Hero */}
-      <div className="relative overflow-hidden rounded-3xl">
-        <div className="h-60 w-full bg-gradient-to-tr from-neutral-800 to-neutral-700" aria-hidden />
+      <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl">
+        <div className="h-40 sm:h-60 w-full bg-gradient-to-tr from-neutral-800 to-neutral-700" aria-hidden />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-neutral-950/90" />
-        <div className="absolute left-6 top-6 sm:left-10 sm:top-10 flex items-center gap-3">
+        <div className="absolute left-3 top-3 sm:left-6 sm:top-6 lg:left-10 lg:top-10 flex items-center gap-2 sm:gap-3">
           <Image 
             src="/logo.png" 
             alt="HopOn Logo" 
             width={48} 
             height={48} 
-            className="h-12 w-12"
+            className="h-8 w-8 sm:h-12 sm:w-12"
             priority
           />
           <div>
-            <h2 className="text-3xl font-extrabold">HopOn</h2>
-            <p className="text-neutral-300">Find your game</p>
+            <h2 className="text-lg sm:text-2xl lg:text-3xl font-extrabold">HopOn</h2>
+            <p className="text-xs sm:text-sm text-neutral-300">Find your game</p>
           </div>
         </div>
-        <div className="absolute inset-x-0 bottom-4">
-          <div className="mx-6 sm:mx-10 grid grid-cols-3 items-start gap-6 rounded-2xl border border-neutral-800 bg-neutral-900/80 p-5 backdrop-blur">
+        <div className="absolute inset-x-0 bottom-2 sm:bottom-4">
+          <div className="mx-3 sm:mx-6 lg:mx-10 grid grid-cols-3 items-start gap-2 sm:gap-6 rounded-lg sm:rounded-2xl border border-neutral-800 bg-neutral-900/80 p-3 sm:p-5 backdrop-blur">
             <Stat label="Nearby" value={nearbyCount.toString()} />
             <Stat label="Joined" value={joinedCount.toString()} />
             <Stat label="Hosted" value={hostedCount.toString()} />
@@ -175,23 +175,23 @@ export default function HomePage() {
         </div>
       </div>
 
-      <div className="mt-24">
-        <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-2xl font-semibold">Nearby Events</h3>
+      <div className="mt-16 sm:mt-24">
+        <div className="mb-3 sm:mb-4 flex items-center justify-between flex-wrap gap-2">
+          <h3 className="text-lg sm:text-2xl font-semibold">Nearby Events</h3>
           <div className="relative" ref={filterRef}>
             <button
               type="button"
               onClick={() => setIsFilterOpen((prev) => !prev)}
-              className="rounded-xl border border-neutral-800 px-3 py-1.5 text-sm text-neutral-300 hover:border-neutral-700 hover:text-white"
+              className="rounded-lg sm:rounded-xl border border-neutral-800 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm text-neutral-300 hover:border-neutral-700 hover:text-white"
               aria-haspopup="true"
               aria-expanded={isFilterOpen}
             >
               Filter
             </button>
             {isFilterOpen && (
-              <div className="absolute right-0 z-20 mt-2 w-64 rounded-xl border border-neutral-800 bg-neutral-900/95 p-4 text-sm shadow-lg">
+              <div className="absolute right-0 z-20 mt-2 w-56 sm:w-64 rounded-lg sm:rounded-xl border border-neutral-800 bg-neutral-900/95 p-3 sm:p-4 text-xs sm:text-sm shadow-lg">
                 <div className="flex items-center justify-between">
-                  <span className="font-semibold text-neutral-100">Filters</span>
+                  <span className="font-semibold text-neutral-100 text-sm">Filters</span>
                   <button
                     type="button"
                     className="text-xs text-neutral-400 hover:text-neutral-200"
@@ -200,13 +200,13 @@ export default function HomePage() {
                     Close
                   </button>
                 </div>
-                <label className="mt-3 block text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                <label className="mt-2 sm:mt-3 block text-xs font-semibold uppercase tracking-wide text-neutral-500">
                   Sport
                 </label>
                 <select
                   value={selectedSport}
                   onChange={(event) => setSelectedSport(event.target.value)}
-                  className="mt-1 w-full rounded-lg border border-neutral-700 bg-neutral-900 px-3 py-2 text-sm text-neutral-100 focus:border-red-400 focus:outline-none"
+                  className="mt-1 w-full rounded-lg border border-neutral-700 bg-neutral-900 px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm text-neutral-100 focus:border-red-400 focus:outline-none"
                 >
                   {availableSports.map((sport) => (
                     <option key={sport} value={sport}>
@@ -216,7 +216,7 @@ export default function HomePage() {
                 </select>
                 <button
                   type="button"
-                  className="mt-3 text-xs font-semibold text-red-400 hover:text-red-300"
+                  className="mt-2 sm:mt-3 text-xs font-semibold text-red-400 hover:text-red-300"
                   onClick={() => setSelectedSport("All")}
                 >
                   Reset filters
@@ -227,14 +227,14 @@ export default function HomePage() {
         </div>
 
         {errorMessage && (
-          <div className="mb-4 rounded-lg border border-red-500/60 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+          <div className="mb-3 sm:mb-4 rounded-lg border border-red-500/60 bg-red-500/10 px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-red-200">
             {errorMessage}
           </div>
         )}
 
-        <div className="grid grid-cols-1 gap-4 pb-8 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 sm:gap-4 pb-8 lg:grid-cols-2">
           {noEventsToShow && (
-            <div className="col-span-full rounded-2xl border border-dashed border-neutral-800 bg-neutral-900/40 px-6 py-8 text-center text-sm text-neutral-400">
+            <div className="col-span-full rounded-lg sm:rounded-2xl border border-dashed border-neutral-800 bg-neutral-900/40 px-4 sm:px-6 py-6 sm:py-8 text-center text-xs sm:text-sm text-neutral-400">
               No events match the selected filters yet. Try adjusting your filters or check back soon.
             </div>
           )}
@@ -279,8 +279,8 @@ export default function HomePage() {
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex flex-col items-center justify-start text-center">
-      <div className="text-2xl font-bold text-red-400">{value}</div>
-      <div className="text-sm text-neutral-300">{label}</div>
+      <div className="text-lg sm:text-2xl font-bold text-red-400">{value}</div>
+      <div className="text-xs sm:text-sm text-neutral-300">{label}</div>
     </div>
   );
 }
