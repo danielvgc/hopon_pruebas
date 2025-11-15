@@ -99,15 +99,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (nextStatus) {
       setStatus(nextStatus);
     }
-
-    // If user needs to set up username, redirect to setup page
-    if (payload.needs_username_setup && typeof window !== "undefined") {
-      console.log("[Auth] User needs username setup, redirecting to setup page");
-      // Use a small delay to ensure state is updated first
-      setTimeout(() => {
-        window.location.href = "/auth/setup-username";
-      }, 100);
-    }
   }, []);
 
   // Load guest state from localStorage.
@@ -200,6 +191,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     let cancelled = false;
     (async () => {
       try {
+        // First, check if there's a pending auth payload from a popup redirect
+        const storedPayload = typeof window !== "undefined" ? window.localStorage.getItem(LOCAL_STORAGE_KEYS.authPayload) : null;
+        if (storedPayload) {
+          try {
+            const payload = JSON.parse(storedPayload) as {
+              user?: HopOnUser;
+              access_token?: string;
+              needs_username_setup?: boolean;
+            };
+            if (cancelled) {
+              return;
+            }
+            applyAuthPayload(payload);
+            window.localStorage.removeItem(LOCAL_STORAGE_KEYS.authPayload);
+            return;
+          } catch (err) {
+            console.error("Failed to parse stored auth payload:", err);
+            window.localStorage.removeItem(LOCAL_STORAGE_KEYS.authPayload);
+          }
+        }
+
+        // If no stored payload, fetch session from backend
         const result = await Api.session();
         if (cancelled) {
           return;
@@ -222,7 +235,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, [resetToGuest]);
+  }, [resetToGuest, applyAuthPayload]);
 
   const loginWithGoogle = React.useCallback(() => {
     if (typeof window === "undefined") {
