@@ -128,6 +128,9 @@ export const Api = {
   async logout() {
     await http<{ message: string }>("/auth/logout", { method: "POST" });
   },
+  async deleteAccount() {
+    return http<{ message: string }>("/auth/delete-account", { method: "DELETE" });
+  },
   async refreshAccessToken() {
     return http<{ access_token: string; user: HopOnUser }>("/auth/refresh", {
       method: "POST",

@@ -703,6 +703,43 @@ def create_app() -> Flask:
         response.delete_cookie('refresh_token')
         return response
 
+    @app.delete("/auth/delete-account")
+    def delete_account():
+        """Delete the authenticated user's account and all associated data."""
+        if not g.current_user:
+            return jsonify({'error': 'Unauthorized'}), 401
+        
+        user_id = g.current_user.id
+        user_email = g.current_user.email
+        
+        try:
+            # Delete all events hosted by this user
+            Event.query.filter_by(host_user_id=user_id).delete()
+            
+            # Delete all event participations (cascade handles this, but explicit for clarity)
+            EventParticipant.query.filter_by(user_id=user_id).delete()
+            
+            # Delete all follow relationships (both as follower and followee)
+            Follow.query.filter_by(follower_id=user_id).delete()
+            Follow.query.filter_by(followee_id=user_id).delete()
+            
+            # Delete the user
+            db.session.delete(g.current_user)
+            db.session.commit()
+            
+            print(f"[HOPON] User account deleted: {user_email} (ID: {user_id})", flush=True)
+            
+            # Clear cookies and return success response
+            response = make_response(jsonify({'message': 'Account deleted successfully'}), 200)
+            response.delete_cookie('refresh_token')
+            response.delete_cookie('user_id')
+            return response
+            
+        except Exception as e:
+            db.session.rollback()
+            print(f"[HOPON] Error deleting account for {user_email}: {str(e)}", flush=True)
+            return jsonify({'error': 'Failed to delete account'}), 500
+
     @app.get("/auth/session")
     def session_info():
         if g.current_user:

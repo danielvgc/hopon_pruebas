@@ -2,9 +2,10 @@
 
 import WebLayout from "@/components/web-layout";
 import { useAuth } from "@/context/auth-context";
-import { API_BASE_URL } from "@/lib/api";
+import { Api, API_BASE_URL } from "@/lib/api";
+import DeleteAccountModal from "@/components/delete-account-modal";
 import { useEffect, useState } from "react";
-import { Calendar, Users, UserCheck, Trophy, Clock, MapPin, X, Check, AlertCircle } from "lucide-react";
+import { Calendar, Users, UserCheck, Trophy, Clock, MapPin, X, Check, AlertCircle, Trash2 } from "lucide-react";
 
 // List of available sports
 const AVAILABLE_SPORTS = [
@@ -30,6 +31,7 @@ export default function ProfilePage() {
   const { status, user, logout, accessToken, setUser } = useAuth();
   const isAuthenticated = status === "authenticated";
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   
   // Helper function to normalize sports data
   const normalizeSports = (sports: string[] | string | null | undefined): string[] => {
@@ -179,6 +181,17 @@ export default function ProfilePage() {
       console.error(error);
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    try {
+      await Api.deleteAccount();
+      // Account deleted successfully, logout
+      await logout();
+    } catch (error) {
+      console.error("Failed to delete account:", error);
+      alert("Failed to delete account. Please try again.");
     }
   };
 
@@ -349,6 +362,26 @@ export default function ProfilePage() {
                 <p className="text-neutral-400 text-sm mb-2">Joined</p>
                 <p className="text-white font-medium">January 2024</p>
               </div>
+            </div>
+          </div>
+
+          {/* Delete Account Section */}
+          <div className="rounded-2xl border border-red-500/20 bg-red-500/5 backdrop-blur p-8">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-1 h-6 bg-red-500 rounded-full"></div>
+              <h2 className="text-xl font-bold text-white">Danger Zone</h2>
+            </div>
+            <div className="space-y-4">
+              <p className="text-neutral-300 text-sm">
+                Permanently delete your account and all associated data. This action cannot be undone.
+              </p>
+              <button
+                onClick={() => setIsDeleteModalOpen(true)}
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-red-500/40 bg-red-500/10 text-red-300 hover:bg-red-500/20 hover:border-red-500/60 transition font-medium"
+              >
+                <Trash2 className="w-4 h-4" />
+                Delete Account
+              </button>
             </div>
           </div>
         </div>
@@ -526,6 +559,13 @@ export default function ProfilePage() {
           </div>
         </div>
       )}
+
+      {/* Delete Account Modal */}
+      <DeleteAccountModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirmDelete={handleDeleteAccount}
+      />
     </WebLayout>
   );
 }
