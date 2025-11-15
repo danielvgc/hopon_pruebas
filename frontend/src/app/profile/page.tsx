@@ -2,6 +2,7 @@
 
 import WebLayout from "@/components/web-layout";
 import { useAuth } from "@/context/auth-context";
+import { API_BASE_URL } from "@/lib/api";
 import { useEffect, useState } from "react";
 import { Calendar, Users, UserCheck, Trophy, Clock, MapPin, X, Check, AlertCircle } from "lucide-react";
 
@@ -48,7 +49,7 @@ export default function ProfilePage() {
     setCheckingUsername(true);
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/auth/username-available?username=${encodeURIComponent(username)}`,
+        `${API_BASE_URL}/auth/username-available?username=${encodeURIComponent(username)}`,
         {
           method: "GET",
           credentials: "include",
@@ -56,7 +57,8 @@ export default function ProfilePage() {
         }
       );
       const data = await response.json();
-      setUsernameAvailable(data.available || false);
+      console.log("Username check response:", data);
+      setUsernameAvailable(data.available === true);
     } catch (error) {
       console.error("Error checking username:", error);
       setUsernameAvailable(false);
@@ -76,7 +78,7 @@ export default function ProfilePage() {
     setSaveMessage("");
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/auth/profile`,
+        `${API_BASE_URL}/auth/profile`,
         {
           method: "PATCH",
           credentials: "include",
