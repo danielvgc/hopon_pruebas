@@ -70,7 +70,7 @@ export default function DeleteAccountModal({
                 <li>✗ Your profile will be permanently deleted</li>
                 <li>✗ All your events will be removed</li>
                 <li>✗ All your followers/following will be cleared</li>
-                <li>✗ You won't be able to recover your data</li>
+                <li>✗ You won&apos;t be able to recover your data</li>
               </ul>
             </div>
 
