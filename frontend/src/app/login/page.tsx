@@ -34,7 +34,7 @@ export default function LoginPage() {
 
     try {
       await login({ email, password });
-      router.push("/home/profile");
+      router.push("/profile");
     } catch (err: unknown) {
       const errMsg =
         err instanceof Error ? err.message : "Failed to sign in. Please try again.";
@@ -49,7 +49,7 @@ export default function LoginPage() {
     setLoading(true);
     try {
       await loginAsDemo({ username: "Demo User" });
-      router.push("/home/profile");
+      router.push("/profile");
     } catch (err: unknown) {
       const errMsg =
         err instanceof Error ? err.message : "Failed to sign in as demo user";
@@ -64,7 +64,7 @@ export default function LoginPage() {
     setLoading(true);
     try {
       await loginWithGoogle();
-      router.push("/home/profile");
+      router.push("/profile");
     } catch (err: unknown) {
       const errMsg =
         err instanceof Error ? err.message : "Failed to sign in with Google";

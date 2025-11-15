@@ -53,7 +53,7 @@ export default function SignupPage() {
 
     try {
       await signup({ email, password, username });
-      router.push("/home/profile");
+      router.push("/profile");
     } catch (err: unknown) {
       const errMsg =
         err instanceof Error
@@ -70,7 +70,7 @@ export default function SignupPage() {
     setLoading(true);
     try {
       await loginWithGoogle();
-      router.push("/home/profile");
+      router.push("/profile");
     } catch (err: unknown) {
       const errMsg =
         err instanceof Error ? err.message : "Failed to sign up with Google";
