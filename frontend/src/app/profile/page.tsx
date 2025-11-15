@@ -85,6 +85,9 @@ export default function ProfilePage() {
                 <div className="flex items-center gap-2 text-neutral-400 mb-3">
                   <span className="text-sm">{user.email}</span>
                 </div>
+                {user.bio && (
+                  <p className="text-neutral-300 text-sm mb-3 italic">{user.bio}</p>
+                )}
                 <div className="flex items-center gap-2 text-sm text-red-400">
                   <Calendar className="w-4 h-4" />
                   <span>Member since January 2024</span>
