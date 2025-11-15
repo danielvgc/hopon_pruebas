@@ -221,7 +221,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           if (result.access_token) {
             setToken(result.access_token);
           }
-          setUser(result.user);
+          // Preserve needs_username_setup flag if already set (from signup flow)
+          const userToSet = user && user.needs_username_setup 
+            ? { ...result.user, needs_username_setup: true }
+            : result.user;
+          setUser(userToSet);
           setStatus("authenticated");
         } else {
           resetToGuest();
