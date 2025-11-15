@@ -2,16 +2,48 @@
 
 import WebLayout from "@/components/web-layout";
 import { useAuth } from "@/context/auth-context";
-import { useEffect } from "react";
-import { Calendar, Users, UserCheck, Trophy, Clock, MapPin } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Calendar, Users, UserCheck, Trophy, Clock, MapPin, X } from "lucide-react";
 
 export default function ProfilePage() {
   useEffect(() => {
     document.title = "Profile - HopOn";
   }, []);
   
-  const { status, user, loginWithGoogle, logout } = useAuth();
+  const { status, user, logout } = useAuth();
   const isAuthenticated = status === "authenticated";
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editData, setEditData] = useState({
+    bio: user?.bio || "",
+    location: user?.location || "",
+    sports: user?.sports || "",
+  });
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveMessage, setSaveMessage] = useState("");
+
+  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setEditData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSaveProfile = async () => {
+    setIsSaving(true);
+    setSaveMessage("");
+    try {
+      // Simulate API call - in real implementation, call backend
+      console.log("Saving profile:", editData);
+      setSaveMessage("Profile updated successfully!");
+      setTimeout(() => {
+        setIsEditModalOpen(false);
+        setSaveMessage("");
+      }, 1500);
+    } catch (error) {
+      setSaveMessage("Failed to save profile");
+      console.error(error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   if (!isAuthenticated || !user) {
     return (
@@ -27,12 +59,6 @@ export default function ProfilePage() {
             <p className="text-neutral-400 mb-6">
               Sign in to build your player profile, connect with other players, and join pickup games.
             </p>
-            <button
-              onClick={() => loginWithGoogle().catch(() => undefined)}
-              className="w-full rounded-xl border border-red-500/40 bg-red-500/10 px-6 py-3 font-semibold text-red-400 hover:border-red-400 hover:bg-red-500/20 hover:text-red-300 transition"
-            >
-              Sign in with Google
-            </button>
           </div>
         </div>
       </WebLayout>
@@ -74,7 +100,10 @@ export default function ProfilePage() {
               >
                 Log Out
               </button>
-              <button className="px-6 py-2.5 rounded-xl bg-red-500/20 border border-red-500/40 text-red-300 hover:bg-red-500/30 hover:border-red-400 transition font-medium text-sm">
+              <button
+                onClick={() => setIsEditModalOpen(true)}
+                className="px-6 py-2.5 rounded-xl bg-red-500/20 border border-red-500/40 text-red-300 hover:bg-red-500/30 hover:border-red-400 transition font-medium text-sm"
+              >
                 Edit Profile
               </button>
             </div>
@@ -196,6 +225,102 @@ export default function ProfilePage() {
           </div>
         </div>
       </div>
+
+      {/* Edit Profile Modal */}
+      {isEditModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="w-full max-w-md mx-4 rounded-3xl border border-neutral-800 bg-neutral-900 p-8 shadow-2xl">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-white">Edit Profile</h2>
+              <button
+                onClick={() => setIsEditModalOpen(false)}
+                className="p-2 hover:bg-neutral-800 rounded-lg transition"
+              >
+                <X className="w-5 h-5 text-neutral-400" />
+              </button>
+            </div>
+
+            {/* Form */}
+            <div className="space-y-5 mb-6">
+              {/* Bio */}
+              <div>
+                <label className="block text-sm font-medium text-neutral-300 mb-2">
+                  Bio
+                </label>
+                <textarea
+                  name="bio"
+                  value={editData.bio}
+                  onChange={handleEditChange}
+                  placeholder="Tell us about yourself..."
+                  className="w-full px-4 py-3 rounded-xl border border-neutral-700 bg-neutral-800/50 text-white placeholder-neutral-500 focus:outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400 transition resize-none"
+                  rows={3}
+                />
+              </div>
+
+              {/* Location */}
+              <div>
+                <label className="block text-sm font-medium text-neutral-300 mb-2">
+                  Location
+                </label>
+                <input
+                  type="text"
+                  name="location"
+                  value={editData.location}
+                  onChange={handleEditChange}
+                  placeholder="e.g., Toronto, Canada"
+                  className="w-full px-4 py-2.5 rounded-xl border border-neutral-700 bg-neutral-800/50 text-white placeholder-neutral-500 focus:outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400 transition"
+                />
+              </div>
+
+              {/* Sports */}
+              <div>
+                <label className="block text-sm font-medium text-neutral-300 mb-2">
+                  Favorite Sports
+                </label>
+                <input
+                  type="text"
+                  name="sports"
+                  value={editData.sports}
+                  onChange={handleEditChange}
+                  placeholder="e.g., Basketball, Football, Tennis"
+                  className="w-full px-4 py-2.5 rounded-xl border border-neutral-700 bg-neutral-800/50 text-white placeholder-neutral-500 focus:outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400 transition"
+                />
+                <p className="text-xs text-neutral-500 mt-1">Separate multiple sports with commas</p>
+              </div>
+            </div>
+
+            {/* Success Message */}
+            {saveMessage && (
+              <div className={`px-4 py-2 rounded-lg text-sm font-medium text-center mb-4 ${
+                saveMessage.includes("successfully") 
+                  ? "bg-green-500/20 text-green-300 border border-green-500/40"
+                  : "bg-red-500/20 text-red-300 border border-red-500/40"
+              }`}>
+                {saveMessage}
+              </div>
+            )}
+
+            {/* Buttons */}
+            <div className="flex gap-3">
+              <button
+                onClick={() => setIsEditModalOpen(false)}
+                disabled={isSaving}
+                className="flex-1 px-4 py-2.5 rounded-xl border border-neutral-700 text-neutral-300 hover:border-neutral-600 hover:text-neutral-200 transition font-medium disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveProfile}
+                disabled={isSaving}
+                className="flex-1 px-4 py-2.5 rounded-xl bg-red-500/20 border border-red-500/40 text-red-300 hover:bg-red-500/30 hover:border-red-400 transition font-medium disabled:opacity-50"
+              >
+                {isSaving ? "Saving..." : "Save Changes"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </WebLayout>
   );
 }
