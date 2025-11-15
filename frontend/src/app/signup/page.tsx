@@ -53,7 +53,8 @@ export default function SignupPage() {
 
     try {
       await signup({ email, password, username });
-      router.push("/profile");
+      // Redirect to setup page - user will see setup form instead of profile
+      router.push("/auth/setup-username");
     } catch (err: unknown) {
       const errMsg =
         err instanceof Error
@@ -70,7 +71,8 @@ export default function SignupPage() {
     setLoading(true);
     try {
       await loginWithGoogle();
-      router.push("/profile");
+      // Redirect to setup page - user will see setup form for Google OAuth flow
+      router.push("/auth/setup-username");
     } catch (err: unknown) {
       const errMsg =
         err instanceof Error ? err.message : "Failed to sign up with Google";

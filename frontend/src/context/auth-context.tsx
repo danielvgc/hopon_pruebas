@@ -314,7 +314,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const result = await Api.signup(opts);
       if (result?.access_token && result?.user) {
-        applyAuthPayload({ access_token: result.access_token, user: result.user });
+        applyAuthPayload({ 
+          access_token: result.access_token, 
+          user: result.user,
+          needs_username_setup: result.needs_username_setup,
+        });
       }
     } catch (err) {
       throw err;

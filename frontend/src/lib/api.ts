@@ -144,7 +144,7 @@ export const Api = {
     });
   },
   async signup(payload: { email: string; password: string; username: string }) {
-    return http<{ message: string; access_token: string; user: HopOnUser }>(`/auth/signup`, {
+    return http<{ message: string; access_token: string; user: HopOnUser; needs_username_setup?: boolean }>(`/auth/signup`, {
       method: "POST",
       body: JSON.stringify(payload),
     });
