@@ -6,7 +6,7 @@ import Link from "next/link";
 import WebLayout from "@/components/web-layout";
 import { useAuth } from "@/context/auth-context";
 
-type SignupMode = "email" | "google";
+type SignupMode = "email";
 
 export default function SignupPage() {
   useEffect(() => {
@@ -108,7 +108,7 @@ export default function SignupPage() {
               </button>
 
               <button
-                onClick={() => setActiveMode("google")}
+                onClick={handleGoogleSignup}
                 disabled={loading}
                 className="w-full rounded-lg border border-neutral-700 bg-neutral-800 py-3 font-semibold text-neutral-100 hover:bg-neutral-700 transition disabled:opacity-50"
               >
@@ -222,31 +222,6 @@ export default function SignupPage() {
                 ← Back to options
               </button>
             </form>
-          )}
-
-          {/* Google Sign Up */}
-          {activeMode === "google" && (
-            <div className="space-y-3">
-              <button
-                onClick={handleGoogleSignup}
-                disabled={loading}
-                className="w-full rounded-lg border border-neutral-700 bg-neutral-800 py-3 font-semibold text-neutral-100 hover:bg-neutral-700 transition disabled:opacity-50"
-              >
-                {loading ? "Connecting to Google..." : "Continue with Google"}
-              </button>
-
-              <p className="text-xs text-center text-neutral-400 py-2">
-                We&apos;ll create your account using your Google profile information
-              </p>
-
-              <button
-                type="button"
-                onClick={() => setActiveMode(null)}
-                className="w-full text-sm text-neutral-400 hover:text-neutral-300 py-2"
-              >
-                ← Back to options
-              </button>
-            </div>
           )}
         </div>
       </div>
