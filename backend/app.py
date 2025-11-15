@@ -729,8 +729,10 @@ def create_app() -> Flask:
         if len(username) > 50:
             return jsonify({'available': False, 'message': 'Username must be at most 50 characters'}), 200
         
-        # Check if username already exists
-        existing = User.query.filter_by(username=username).first()
+        # Check if username already exists (case-insensitive)
+        existing = User.query.filter(User.username.ilike(username)).first()
+        
+        print(f"[HOPON] Checking username availability: '{username}' - Found: {existing is not None}", flush=True)
         
         if existing:
             return jsonify({'available': False, 'message': 'Username already taken'}), 200

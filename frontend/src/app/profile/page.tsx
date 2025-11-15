@@ -25,6 +25,20 @@ export default function ProfilePage() {
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
 
+  // Sync editData when modal opens or user data changes
+  useEffect(() => {
+    if (isEditModalOpen && user) {
+      setEditData({
+        username: user.username || "",
+        bio: user.bio || "",
+        location: user.location || "",
+        sports: user.sports || "",
+      });
+      setUsernameAvailable(null);
+      console.log("[Profile] Modal opened, synced editData:", { username: user.username, bio: user.bio });
+    }
+  }, [isEditModalOpen, user]);
+
   const handleEditChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setEditData((prev) => ({ ...prev, [name]: value }));
@@ -36,31 +50,37 @@ export default function ProfilePage() {
   };
 
   const checkUsernameAvailability = async (username: string) => {
+    console.log("[Profile] Checking username availability for:", username);
+    
     if (!username || username === user?.username) {
+      console.log("[Profile] Username is empty or same as current, skipping check");
       setUsernameAvailable(null);
       return;
     }
 
     if (username.length < 3) {
+      console.log("[Profile] Username too short");
       setUsernameAvailable(false);
       return;
     }
 
     setCheckingUsername(true);
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/auth/username-available?username=${encodeURIComponent(username)}`,
-        {
-          method: "GET",
-          credentials: "include",
-          headers: { "Content-Type": "application/json" },
-        }
-      );
+      const url = `${API_BASE_URL}/auth/username-available?username=${encodeURIComponent(username)}`;
+      console.log("[Profile] Fetching from:", url);
+      
+      const response = await fetch(url, {
+        method: "GET",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+      });
+      
       const data = await response.json();
-      console.log("Username check response:", data);
+      console.log("[Profile] Username check response:", data, "available field:", data.available, "type:", typeof data.available);
+      
       setUsernameAvailable(data.available === true);
     } catch (error) {
-      console.error("Error checking username:", error);
+      console.error("[Profile] Error checking username:", error);
       setUsernameAvailable(false);
     } finally {
       setCheckingUsername(false);
