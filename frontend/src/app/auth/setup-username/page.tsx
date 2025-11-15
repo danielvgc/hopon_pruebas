@@ -28,7 +28,7 @@ export default function SetupUsernamePage() {
       if (!user.needs_username_setup) {
         router.push("/profile");
       }
-    } else if (status === "unauthenticated") {
+    } else if (status === "guest") {
       // If not authenticated, redirect to login
       router.push("/login");
     }
