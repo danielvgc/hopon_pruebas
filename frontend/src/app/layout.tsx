@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 // @ts-ignore
 import "./globals.css";
 import { AuthProvider } from "@/context/auth-context";
+import PWAInstaller from "@/components/pwa-installer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,6 +18,15 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "HopOn - Find Pickup Games Nearby",
   description: "Find pickup games nearby, connect with players, and keep your schedule in sync.",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "HopOn",
+  },
+  formatDetection: {
+    telephone: false,
+  },
   icons: {
     icon: [
       {
@@ -25,6 +35,7 @@ export const metadata: Metadata = {
         type: "image/png",
       },
     ],
+    apple: "/logo.png",
   },
 };
 
@@ -38,6 +49,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <PWAInstaller />
         <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
