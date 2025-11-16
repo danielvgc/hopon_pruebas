@@ -179,7 +179,16 @@ export default function DiscoverPage() {
         sportSet.add(event.sport.trim());
       }
     });
-    return [DEFAULT_FILTER, ...Array.from(sportSet).sort((a, b) => a.localeCompare(b))];
+    
+    // Build the filters array - ensure it's always an array of strings only
+    const sportsArray = Array.from(sportSet)
+      .sort((a, b) => a.localeCompare(b))
+      .filter((sport) => typeof sport === 'string' && sport.length > 0);
+    
+    const result = [DEFAULT_FILTER, ...sportsArray];
+    
+    // Safety check: ensure all elements are strings
+    return result.filter((item) => typeof item === 'string' && item.length > 0) as string[];
   }, [playerItems, eventItems]);
 
   React.useEffect(() => {
@@ -301,11 +310,19 @@ export default function DiscoverPage() {
             onChange={(e) => setActiveFilter(e.target.value)}
             className="w-full rounded-lg border border-neutral-800 bg-neutral-900/60 px-3 py-2 text-xs sm:text-sm text-neutral-100 focus:border-red-400 focus:outline-none cursor-pointer"
           >
-            {filters.map((filter) => (
-              <option key={`select-${filter}`} value={filter}>
-                {filter}
-              </option>
-            ))}
+            {Array.isArray(filters) && filters.length > 0 ? (
+              filters.map((filter) => {
+                // Ensure filter is a string
+                const filterStr = String(filter).trim();
+                return filterStr ? (
+                  <option key={`select-${filterStr}`} value={filterStr}>
+                    {filterStr}
+                  </option>
+                ) : null;
+              })
+            ) : (
+              <option value="Nearby">Nearby</option>
+            )}
           </select>
         </div>
       </div>
