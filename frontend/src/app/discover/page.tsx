@@ -1,6 +1,7 @@
 "use client";
 
 import WebLayout from "@/components/web-layout";
+import MapDisplay from "@/components/map-display";
 import { UserCard } from "@/components/user-card";
 import { EventCard } from "@/components/event-card";
 import { Search } from "lucide-react";
@@ -49,6 +50,7 @@ export default function DiscoverPage() {
   const [events, setEvents] = React.useState<HopOnEvent[]>([]);
   const [activeFilter, setActiveFilter] = React.useState(DEFAULT_FILTER);
   const [playerOverrides, setPlayerOverrides] = React.useState<Record<string, boolean>>({});
+  const [selectedEventId, setSelectedEventId] = React.useState<number | undefined>();
 
   // Fetch players - same for everyone
   React.useEffect(() => {
@@ -324,6 +326,21 @@ export default function DiscoverPage() {
       </div>
 
       <div className="mt-4 sm:mt-6 space-y-6 sm:space-y-10 pb-10">
+        {/* Map Section */}
+        {events.length > 0 && (
+          <section>
+            <div className="mb-2 sm:mb-3">
+              <h2 className="text-base sm:text-xl font-semibold">Event Map</h2>
+            </div>
+            <MapDisplay
+              events={events}
+              selectedEventId={selectedEventId}
+              onEventSelect={(event) => setSelectedEventId(event.id)}
+              height="300px"
+            />
+          </section>
+        )}
+
         <section>
           <div className="mb-2 sm:mb-3 flex items-center justify-between">
             <h2 className="text-base sm:text-xl font-semibold">Players</h2>
