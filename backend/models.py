@@ -80,6 +80,8 @@ class User(db.Model):
     # Simple discovery fields
     rating = db.Column(db.Float, nullable=True)
     location = db.Column(db.String(100), nullable=True)
+    latitude = db.Column(db.Float, nullable=True)
+    longitude = db.Column(db.Float, nullable=True)
     sports = db.Column(db.Text, nullable=True)  # comma-separated list
     google_sub = db.Column(db.String(255), unique=True, nullable=True)
     avatar_url = db.Column(db.Text, nullable=True)
@@ -111,6 +113,8 @@ class User(db.Model):
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'rating': self.rating,
             'location': self.location,
+            'latitude': self.latitude,
+            'longitude': self.longitude,
             'sports': [s.strip() for s in self.sports.split(',')] if self.sports else None,
             'avatar_url': self.avatar_url,
         }

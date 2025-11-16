@@ -1,6 +1,7 @@
 "use client";
 
 import WebLayout from "@/components/web-layout";
+import LocationPicker from "@/components/location-picker";
 import { Api } from "@/lib/api";
 import * as React from "react";
 
@@ -12,7 +13,7 @@ export default function CreatePage() {
   const [form, setForm] = React.useState({
     name: "",
     sport: "Basketball",
-    location: "",
+    location: { address: "", lat: undefined as number | undefined, lng: undefined as number | undefined },
     event_date: "",
     max_players: 10,
     skill_level: "Intermediate",
@@ -28,12 +29,18 @@ export default function CreatePage() {
     e.preventDefault();
     try {
       const res = await Api.createEvent({
-        ...form,
+        name: form.name,
+        sport: form.sport,
+        location: form.location.address,
+        latitude: form.location.lat,
+        longitude: form.location.lng,
         event_date: form.event_date ? new Date(form.event_date).toISOString() : undefined,
+        max_players: form.max_players,
+        skill_level: form.skill_level,
         notes: form.notes.trim() ? form.notes.trim() : undefined,
       });
       setResult(`Created: ${res.event.name}`);
-      setForm({ ...form, name: "", location: "", event_date: "", notes: "" });
+      setForm({ ...form, name: "", location: { address: "", lat: undefined, lng: undefined }, event_date: "", notes: "" });
     } catch (err: unknown) {
       const message =
         err instanceof Error ? err.message : "Failed to create event";
@@ -66,12 +73,10 @@ export default function CreatePage() {
           </select>
         </Field>
         <Field label="Location">
-          <input
-            value={form.location}
-            onChange={(e) => update("location", e.target.value)}
-            className="w-full rounded-lg sm:rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm"
-            placeholder="Venue or address"
-            required
+          <LocationPicker
+            value={form.location.address ? form.location : null}
+            onChange={(loc) => update("location", loc)}
+            placeholder="Search for event location..."
           />
         </Field>
         <Field label="Date & Time">
