@@ -79,7 +79,7 @@ export default function LocationPicker({
       try {
         const result = await autocompleteServiceRef.current.getPlacePredictions({
           input: val,
-          componentRestrictions: { country: "us" }, // Adjust countries as needed
+          // Search globally - no country restrictions
         });
 
         setPredictions(
