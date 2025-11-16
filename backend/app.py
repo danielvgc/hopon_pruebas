@@ -82,7 +82,7 @@ def create_app() -> Flask:
             # Check if origin matches allowed list or is a vercel.app subdomain
             if origin in frontend_origins or origin.endswith('.vercel.app'):
                 response.headers['Access-Control-Allow-Origin'] = origin
-                response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS, HEAD'
+                response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD'
                 response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
                 response.headers['Access-Control-Allow-Credentials'] = 'true'
         return response
@@ -90,7 +90,7 @@ def create_app() -> Flask:
     app.after_request(cors_middleware)
     
     # Also use CORS() for basic preflight handling
-    CORS(app, supports_credentials=True, resources={r"/*": {"origins": frontend_origins}})
+    CORS(app, supports_credentials=True, methods=['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'], resources={r"/*": {"origins": frontend_origins}})
 
     oauth = OAuth()
     oauth.init_app(app)
