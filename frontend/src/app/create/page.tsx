@@ -3,6 +3,7 @@
 import WebLayout from "@/components/web-layout";
 import LocationPicker from "@/components/location-picker";
 import { Api } from "@/lib/api";
+import { AVAILABLE_SPORTS } from "@/lib/sports";
 import * as React from "react";
 
 export default function CreatePage() {
@@ -65,7 +66,7 @@ export default function CreatePage() {
             onChange={(e) => update("sport", e.target.value)}
             className="w-full rounded-lg sm:rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm"
           >
-            {['Basketball','Tennis','Badminton','Soccer'].map((s) => (
+            {AVAILABLE_SPORTS.map((s) => (
               <option key={s} value={s}>
                 {s}
               </option>
