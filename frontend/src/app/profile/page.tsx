@@ -44,6 +44,17 @@ export default function ProfilePage() {
     return [];
   };
 
+  // Helper function to format join date as "Month Year"
+  const formatJoinDate = (createdAt: string | null | undefined): string => {
+    if (!createdAt) return "Unknown";
+    try {
+      const date = new Date(createdAt);
+      return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    } catch {
+      return "Unknown";
+    }
+  };
+
   const [editData, setEditData] = useState({
     username: user?.username || "",
     bio: user?.bio || "",
@@ -255,7 +266,7 @@ export default function ProfilePage() {
                 )}
                 <div className="flex items-center gap-2 text-xs sm:text-sm text-red-400">
                   <Calendar className="w-3 sm:w-4 h-3 sm:h-4 flex-shrink-0" />
-                  <span>Member since January 2024</span>
+                  <span>Member since {formatJoinDate(user?.created_at)}</span>
                 </div>
               </div>
             </div>
