@@ -128,7 +128,7 @@ export default function SignupPage() {
                 href="/login"
                 className="block text-center text-sm text-neutral-400 hover:text-neutral-300 py-2 transition"
               >
-                Already have an account? <span className="text-red-400 hover:text-red-300 font-semibold">Sign In</span>
+                Already have an account? <span className="text-red-400 hover:text-red-300 font-semibold">Log In</span>
               </Link>
             </div>
           )}

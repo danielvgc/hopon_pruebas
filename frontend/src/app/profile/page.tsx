@@ -239,7 +239,7 @@ export default function ProfilePage() {
             </div>
             <h2 className="text-lg sm:text-2xl font-bold text-amber-400 mb-2">Create Your Profile</h2>
             <p className="text-xs sm:text-sm text-amber-100/80 mb-6">
-              Sign in to build your player profile, connect with other players, and join pickup games.
+              Log in to build your player profile, connect with other players, and join pickup games.
             </p>
             <div className="flex gap-3 flex-col">
               <button

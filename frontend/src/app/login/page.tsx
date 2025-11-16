@@ -10,7 +10,7 @@ type LoginMode = "credentials" | "google" | "demo";
 
 export default function LoginPage() {
   useEffect(() => {
-    document.title = "Sign In - HopOn";
+    document.title = "Log In - HopOn";
   }, []);
   const router = useRouter();
   const { login, loginWithGoogle, loginAsDemo } = useAuth();
@@ -37,7 +37,7 @@ export default function LoginPage() {
       router.push("/profile");
     } catch (err: unknown) {
       const errMsg =
-        err instanceof Error ? err.message : "Failed to sign in. Please try again.";
+        err instanceof Error ? err.message : "Failed to log in. Please try again.";
       setError(errMsg);
     } finally {
       setLoading(false);
@@ -52,7 +52,7 @@ export default function LoginPage() {
       router.push("/profile");
     } catch (err: unknown) {
       const errMsg =
-        err instanceof Error ? err.message : "Failed to sign in as demo user";
+        err instanceof Error ? err.message : "Failed to log in as demo user";
       setError(errMsg);
     } finally {
       setLoading(false);
@@ -67,7 +67,7 @@ export default function LoginPage() {
       router.push("/profile");
     } catch (err: unknown) {
       const errMsg =
-        err instanceof Error ? err.message : "Failed to sign in with Google";
+        err instanceof Error ? err.message : "Failed to log in with Google";
       setError(errMsg);
     } finally {
       setLoading(false);
@@ -75,14 +75,14 @@ export default function LoginPage() {
   };
 
   return (
-    <WebLayout title="Sign In">
+    <WebLayout title="Log In">
       <div className="mx-auto max-w-md space-y-6">
         <div className="rounded-3xl border border-neutral-800 bg-neutral-900/60 p-8 backdrop-blur-sm">
           <h1 className="mb-2 text-3xl font-bold text-neutral-100">
             Welcome Back
           </h1>
           <p className="mb-8 text-sm text-neutral-400">
-            Sign in to your HopOn account to continue
+            Log in to your HopOn account to continue
           </p>
 
           {error && (
@@ -98,7 +98,7 @@ export default function LoginPage() {
                 onClick={() => setActiveMode("credentials")}
                 className="w-full rounded-lg bg-gradient-to-r from-red-500 to-red-600 py-3 font-semibold text-white hover:from-red-400 hover:to-red-500 transition shadow-lg hover:shadow-red-500/50"
               >
-                Sign In with Email
+                Log In with Email
               </button>
 
               <button
@@ -106,7 +106,7 @@ export default function LoginPage() {
                 disabled={loading}
                 className="w-full rounded-lg border border-neutral-700 bg-neutral-800 py-3 font-semibold text-neutral-100 hover:bg-neutral-700 transition disabled:opacity-50"
               >
-                {loading ? "Loading..." : "Sign In with Google"}
+                {loading ? "Loading..." : "Log In with Google"}
               </button>
 
               <button
@@ -162,7 +162,7 @@ export default function LoginPage() {
                 disabled={loading}
                 className="w-full rounded-lg bg-gradient-to-r from-red-500 to-red-600 py-2 font-semibold text-white hover:from-red-400 hover:to-red-500 disabled:opacity-50 disabled:cursor-not-allowed transition shadow-lg"
               >
-                {loading ? "Signing In..." : "Sign In"}
+                {loading ? "Logging In..." : "Log In"}
               </button>
 
               <button

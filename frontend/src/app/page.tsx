@@ -48,7 +48,7 @@ export default function LandingPage() {
             href="/login"
             className="rounded-lg border-2 border-red-500 px-8 py-3 text-base font-semibold text-red-400 transition hover:bg-red-500/10 hover:text-red-300"
           >
-            Sign In
+            Log In
           </Link>
           <Link
             href="/discover"

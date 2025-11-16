@@ -85,7 +85,7 @@ export default function TopNav() {
                   href="/login"
                   className="rounded-xl border border-neutral-700 px-3 py-1.5 text-sm text-neutral-300 hover:border-neutral-500 hover:text-neutral-100"
                 >
-                  Sign In
+                  Log In
                 </Link>
                 <Link
                   href="/signup"
@@ -167,7 +167,7 @@ export default function TopNav() {
                     onClick={handleNavClick}
                     className="block text-center rounded-lg border border-neutral-700 px-4 py-2 text-sm text-neutral-300 hover:border-neutral-500 hover:text-neutral-100 mb-2 transition"
                   >
-                    Sign In
+                    Log In
                   </Link>
                   <Link
                     href="/signup"
