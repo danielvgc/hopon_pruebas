@@ -20,6 +20,7 @@ export type EventCardProps = {
   rightActionLabel?: string;
   onRightActionClick?: () => void;
   disabled?: boolean;
+  onViewDetails?: () => void;
 };
 
 export function EventCard({
@@ -36,6 +37,7 @@ export function EventCard({
   rightActionLabel = "Join",
   onRightActionClick,
   disabled = false,
+  onViewDetails,
 }: EventCardProps) {
   const distance =
     typeof distanceKm === "number" ? `${distanceKm.toFixed(1)} km` : undefined;
@@ -105,6 +107,15 @@ export function EventCard({
           >
             {rightActionLabel}
           </button>
+          {onViewDetails && (
+            <button
+              type="button"
+              onClick={onViewDetails}
+              className="rounded-lg sm:rounded-xl bg-neutral-700 hover:bg-neutral-600 px-2.5 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold text-white whitespace-nowrap transition"
+            >
+              Details
+            </button>
+          )}
         </div>
       </div>
     </div>

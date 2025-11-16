@@ -216,4 +216,9 @@ export const Api = {
       body: JSON.stringify(payload),
     });
   },
+  async deleteEvent(eventId: number) {
+    return http<{ message: string }>(`/events/${eventId}`, {
+      method: "DELETE",
+    });
+  },
 };
