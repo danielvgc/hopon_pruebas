@@ -95,6 +95,24 @@ export default function EventsPage() {
   const items = tab === "joined" ? joined : hosted;
   const hasEvents = items.length > 0;
 
+  // Calculate stats dynamically
+  const now = new Date();
+  const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  const thisMonthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
+  const thisMonthEvents = joined.filter((e) => {
+    if (!e.event_date) return false;
+    const eventDate = new Date(e.event_date);
+    return eventDate >= thisMonthStart && eventDate <= thisMonthEnd;
+  }).length;
+
+  const upcomingEvents = joined.filter((e) => {
+    if (!e.event_date) return false;
+    return new Date(e.event_date) > now;
+  }).length;
+
+  const totalEvents = joined.length + hosted.length;
+
   return (
     <WebLayout title="My Events">
       <div className="mt-2 flex gap-2 rounded-2xl bg-neutral-900/60 p-1">
@@ -123,11 +141,13 @@ export default function EventsPage() {
       <div className="mt-4 grid grid-cols-3 gap-6 rounded-2xl border border-neutral-800 bg-neutral-900/60 p-5 text-center">
         {stats.map((s) => {
           const value =
-            s.label === "Upcoming"
-              ? hosted.length.toString()
-              : s.label === "Total Events"
-                ? (hosted.length + joined.length).toString()
-                : s.value;
+            s.label === "This Month"
+              ? thisMonthEvents.toString()
+              : s.label === "Upcoming"
+                ? upcomingEvents.toString()
+                : s.label === "Total Events"
+                  ? totalEvents.toString()
+                  : s.value;
           return (
             <div key={s.label}>
               <div className="text-3xl font-extrabold text-red-400">{value}</div>
