@@ -38,6 +38,7 @@ type EventDisplay = {
 
 const DEFAULT_FILTER = "Nearby";
 
+// Discover page component
 export default function DiscoverPage() {
   React.useEffect(() => {
     document.title = "Discover Games - HopOn";
