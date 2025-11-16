@@ -19,10 +19,52 @@ from flask import (
     session,
 )
 from flask_cors import CORS
-from sqlalchemy import or_
+from sqlalchemy import or_, inspect, text
 from sqlalchemy.exc import IntegrityError
 
 from models import db, Event, EventParticipant, User, Follow
+
+def migrate_add_missing_columns(db_instance):
+    """Add missing columns to existing tables (for production migrations)."""
+    inspector = inspect(db_instance.engine)
+    
+    # Check if user_model table exists and add latitude/longitude if missing
+    if 'user_model' in inspector.get_table_names():
+        existing_columns = {col['name'] for col in inspector.get_columns('user_model')}
+        if 'latitude' not in existing_columns:
+            try:
+                with db_instance.engine.begin() as conn:
+                    conn.execute(db_instance.text('ALTER TABLE user_model ADD COLUMN latitude FLOAT DEFAULT NULL'))
+                print("[MIGRATION] Added latitude column to user_model")
+            except Exception as e:
+                print(f"[MIGRATION] Warning: Could not add latitude column: {e}")
+        
+        if 'longitude' not in existing_columns:
+            try:
+                with db_instance.engine.begin() as conn:
+                    conn.execute(db_instance.text('ALTER TABLE user_model ADD COLUMN longitude FLOAT DEFAULT NULL'))
+                print("[MIGRATION] Added longitude column to user_model")
+            except Exception as e:
+                print(f"[MIGRATION] Warning: Could not add longitude column: {e}")
+    
+    # Check if events table exists and add latitude/longitude if missing
+    if 'events' in inspector.get_table_names():
+        existing_columns = {col['name'] for col in inspector.get_columns('events')}
+        if 'latitude' not in existing_columns:
+            try:
+                with db_instance.engine.begin() as conn:
+                    conn.execute(db_instance.text('ALTER TABLE events ADD COLUMN latitude FLOAT DEFAULT NULL'))
+                print("[MIGRATION] Added latitude column to events")
+            except Exception as e:
+                print(f"[MIGRATION] Warning: Could not add latitude column to events: {e}")
+        
+        if 'longitude' not in existing_columns:
+            try:
+                with db_instance.engine.begin() as conn:
+                    conn.execute(db_instance.text('ALTER TABLE events ADD COLUMN longitude FLOAT DEFAULT NULL'))
+                print("[MIGRATION] Added longitude column to events")
+            except Exception as e:
+                print(f"[MIGRATION] Warning: Could not add longitude column to events: {e}")
 
 def create_app() -> Flask:
     app = Flask(__name__)
@@ -270,6 +312,7 @@ def create_app() -> Flask:
 
     with app.app_context():
         db.create_all()
+        migrate_add_missing_columns(db)
         seed_initial_data()
 
     @app.before_request
