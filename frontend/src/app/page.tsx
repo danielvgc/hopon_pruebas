@@ -116,7 +116,7 @@ export default function LandingPage() {
               <div className="text-4xl">✨</div>
               <h3 className="text-xl sm:text-2xl font-bold text-neutral-100">Our Solution</h3>
               <p className="text-neutral-400 leading-relaxed">
-                HopOn is a sport-specific platform built for pickup games. Find nearby courts, discover other players, organize matches, and build your local sports community—all in one place.
+                HopOn is a sport-specific platform built for pickup games. Find nearby courts, discover other players, organize matches, and build your local sports community. Everything you need is in one place.
               </p>
               <ul className="space-y-2 text-neutral-400 text-sm">
                 <li>✓ Location-based game discovery</li>
@@ -159,7 +159,7 @@ export default function LandingPage() {
               <div className="rounded-xl border border-neutral-800 bg-neutral-900/40 p-5 space-y-3">
                 <div className="text-3xl">🎯</div>
                 <h4 className="font-semibold text-neutral-100">Play More</h4>
-                <p className="text-sm text-neutral-400">Never miss a game—get instant access to events whenever you&rsquo;re free</p>
+                <p className="text-sm text-neutral-400">Never miss a game. Get instant access to events whenever you&rsquo;re free</p>
               </div>
             </div>
           </div>
@@ -171,7 +171,7 @@ export default function LandingPage() {
               Students • Young Professionals • Casual Athletes • Anyone who loves sports
             </p>
             <p className="text-neutral-500 text-sm">
-              Whether you play basketball, tennis, badminton, or 80+ other sports—HopOn connects you with your people
+              Whether you play basketball, tennis, badminton, or 80+ other sports, HopOn connects you with your people
             </p>
           </div>
         </div>
