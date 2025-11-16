@@ -2,6 +2,7 @@
 
 import { MapPin, Clock, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { getSportEmoji } from "@/lib/sports-emoji";
 
 export type EventCardProps = {
   id?: number | string;
@@ -49,7 +50,9 @@ export function EventCard({
   return (
     <div className="rounded-lg sm:rounded-2xl border border-neutral-800 bg-neutral-900/60 p-3 sm:p-5 shadow-sm">
       <div className="flex items-start gap-2 sm:gap-3">
-        <div className="h-8 sm:h-10 w-8 sm:w-10 flex-shrink-0 rounded-full bg-neutral-800" />
+        <div className="h-8 sm:h-10 w-8 sm:w-10 flex-shrink-0 rounded-full bg-neutral-800 flex items-center justify-center text-lg sm:text-xl">
+          {getSportEmoji(sport)}
+        </div>
         <div className="flex-1 min-w-0">
           <h3 className="text-base sm:text-xl font-semibold leading-tight truncate">{title}</h3>
           <p className="mt-0.5 sm:mt-1 text-xs sm:text-sm text-neutral-300 truncate">
