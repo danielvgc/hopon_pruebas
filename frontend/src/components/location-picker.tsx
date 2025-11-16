@@ -9,7 +9,7 @@ declare global {
 }
 
 interface LocationPickerProps {
-  value: { address: string; lat?: number; lng?: number } | null;
+  value: { address: string; lat?: number | null; lng?: number | null } | null;
   onChange: (location: { address: string; lat: number; lng: number }) => void;
   placeholder?: string;
 }

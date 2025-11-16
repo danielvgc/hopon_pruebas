@@ -815,6 +815,12 @@ def create_app() -> Flask:
         if 'location' in data:
             user.location = data.get('location') or None
         
+        # Update latitude/longitude if provided
+        if 'latitude' in data:
+            user.latitude = data.get('latitude')
+        if 'longitude' in data:
+            user.longitude = data.get('longitude')
+        
         # Update sports if provided
         if 'sports' in data:
             sports_data = data.get('sports')
@@ -897,6 +903,12 @@ def create_app() -> Flask:
         # Update location (optional)
         if 'location' in data:
             user.location = data.get('location') or None
+        
+        # Update latitude/longitude (optional)
+        if 'latitude' in data:
+            user.latitude = data.get('latitude')
+        if 'longitude' in data:
+            user.longitude = data.get('longitude')
         
         # Update sports (optional)
         if 'sports' in data:

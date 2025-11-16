@@ -26,6 +26,8 @@ export type HopOnUser = {
   gender?: string | null;
   rating?: number | null;
   location?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
   sports?: string[] | null;
   eventsCount?: number | null;
   events_count?: number | null;
@@ -156,7 +158,7 @@ export const Api = {
       body: JSON.stringify(payload),
     });
   },
-  async setupAccount(payload: { username: string; bio?: string; location?: string | null; sports?: string[] }) {
+  async setupAccount(payload: { username: string; bio?: string; location?: string | null; latitude?: number; longitude?: number; sports?: string[] }) {
     return http<{ message: string; user: HopOnUser }>(`/auth/setup-account`, {
       method: "POST",
       body: JSON.stringify(payload),

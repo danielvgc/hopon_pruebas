@@ -1,6 +1,7 @@
 "use client";
 
 import WebLayout from "@/components/web-layout";
+import LocationPicker from "@/components/location-picker";
 import { useAuth } from "@/context/auth-context";
 import { Api, API_BASE_URL } from "@/lib/api";
 import DeleteAccountModal from "@/components/delete-account-modal";
@@ -58,7 +59,11 @@ export default function ProfilePage() {
   const [editData, setEditData] = useState({
     username: user?.username || "",
     bio: user?.bio || "",
-    location: user?.location || "",
+    location: { 
+      address: user?.location || "", 
+      lat: user?.latitude, 
+      lng: user?.longitude 
+    },
     sports: normalizeSports(user?.sports),
   });
   const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
@@ -72,7 +77,11 @@ export default function ProfilePage() {
       setEditData({
         username: user.username || "",
         bio: user.bio || "",
-        location: user.location || "",
+        location: { 
+          address: user.location || "", 
+          lat: user.latitude, 
+          lng: user.longitude 
+        },
         sports: normalizeSports(user.sports),
       });
       setUsernameAvailable(null);
@@ -158,13 +167,23 @@ export default function ProfilePage() {
         headers["Authorization"] = `Bearer ${accessToken}`;
       }
 
+      // Prepare payload with location data separated
+      const payload = {
+        username: editData.username,
+        bio: editData.bio,
+        location: editData.location.address,
+        latitude: editData.location.lat,
+        longitude: editData.location.lng,
+        sports: editData.sports,
+      };
+
       const response = await fetch(
         `${API_BASE_URL}/auth/profile`,
         {
           method: "PATCH",
           credentials: "include",
           headers,
-          body: JSON.stringify(editData),
+          body: JSON.stringify(payload),
         }
       );
 
@@ -475,13 +494,10 @@ export default function ProfilePage() {
                 <label className="block text-sm font-medium text-neutral-300 mb-2">
                   Location
                 </label>
-                <input
-                  type="text"
-                  name="location"
-                  value={editData.location}
-                  onChange={handleEditChange}
-                  placeholder="e.g., Toronto, Canada"
-                  className="w-full px-4 py-2.5 rounded-xl border border-neutral-700 bg-neutral-800/50 text-white placeholder-neutral-500 focus:outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400 transition"
+                <LocationPicker
+                  value={editData.location.address ? editData.location : null}
+                  onChange={(loc) => setEditData((prev) => ({ ...prev, location: loc }))}
+                  placeholder="Search for your location..."
                 />
               </div>
 
