@@ -1,8 +1,5 @@
 "use client";
 
-// Mark this as dynamic so Next.js doesn't pre-render the stale HTML version
-export const dynamic = 'force-dynamic';
-
 import WebLayout from "@/components/web-layout";
 import { UserCard } from "@/components/user-card";
 import { EventCard } from "@/components/event-card";
