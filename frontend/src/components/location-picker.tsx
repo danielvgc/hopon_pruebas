@@ -28,6 +28,8 @@ export default function LocationPicker({
   const [predictions, setPredictions] = useState<PlacePrediction[]>([]);
   const [showPredictions, setShowPredictions] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [apiReady, setApiReady] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const autocompleteServiceRef = useRef<google.maps.places.AutocompleteService | null>(null);
@@ -38,16 +40,39 @@ export default function LocationPicker({
   // Load Google Maps API
   useEffect(() => {
     if (!apiKey) return;
-    if (window.google?.maps) return; // Already loaded
+    if (window.google?.maps?.places) {
+      setApiReady(true);
+      return;
+    }
 
     const script = document.createElement("script");
     script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
     script.async = true;
     script.defer = true;
+
+    const handleScriptLoad = () => {
+      // Add small delay to ensure google object is ready
+      setTimeout(() => {
+        if (window.google?.maps?.places) {
+          setApiReady(true);
+          setApiError(null);
+        } else {
+          setApiError("Google Maps API failed to initialize");
+        }
+      }, 100);
+    };
+
+    const handleScriptError = () => {
+      setApiError("Failed to load Google Maps API");
+    };
+
+    script.addEventListener("load", handleScriptLoad);
+    script.addEventListener("error", handleScriptError);
     document.head.appendChild(script);
 
     return () => {
-      // Don't remove script - it can be reused
+      script.removeEventListener("load", handleScriptLoad);
+      script.removeEventListener("error", handleScriptError);
     };
   }, [apiKey]);
 
@@ -62,7 +87,10 @@ export default function LocationPicker({
         return;
       }
 
-      if (!autocompleteServiceRef.current) return;
+      if (!autocompleteServiceRef.current || !apiReady) {
+        console.warn("Autocomplete service not ready");
+        return;
+      }
 
       setIsLoading(true);
       try {
@@ -85,12 +113,15 @@ export default function LocationPicker({
         setIsLoading(false);
       }
     },
-    []
+    [apiReady]
   );
 
   const handleSelectPrediction = useCallback(
     (prediction: PlacePrediction) => {
-      if (!placesServiceRef.current) return;
+      if (!placesServiceRef.current || !apiReady) {
+        console.warn("Places service not ready");
+        return;
+      }
 
       setIsLoading(true);
       placesServiceRef.current.getDetails(
@@ -116,7 +147,7 @@ export default function LocationPicker({
         }
       );
     },
-    [onChange]
+    [onChange, apiReady]
   );
 
   // Close predictions when clicking outside
@@ -133,20 +164,41 @@ export default function LocationPicker({
 
   // Initialize services when Google Maps loads
   useEffect(() => {
-    if (!apiKey || !window.google?.maps) return;
+    if (!apiReady || !window.google?.maps?.places) return;
 
     if (!autocompleteServiceRef.current) {
-      autocompleteServiceRef.current = new window.google.maps.places.AutocompleteService();
-      const dummyDiv = document.createElement("div");
-      const dummyMap = new window.google.maps.Map(dummyDiv);
-      placesServiceRef.current = new window.google.maps.places.PlacesService(dummyMap);
+      try {
+        autocompleteServiceRef.current = new window.google.maps.places.AutocompleteService();
+        const dummyDiv = document.createElement("div");
+        const dummyMap = new window.google.maps.Map(dummyDiv);
+        placesServiceRef.current = new window.google.maps.places.PlacesService(dummyMap);
+      } catch (error) {
+        console.error("Error initializing Google Maps services:", error);
+        setApiError("Failed to initialize location services");
+      }
     }
-  }, [apiKey]);
+  }, [apiReady]);
 
   if (!apiKey) {
     return (
       <div className="w-full rounded-lg sm:rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-red-500">
         Google Maps API key not configured
+      </div>
+    );
+  }
+
+  if (apiError) {
+    return (
+      <div className="w-full rounded-lg sm:rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-red-500">
+        Location services unavailable: {apiError}
+      </div>
+    );
+  }
+
+  if (!apiReady) {
+    return (
+      <div className="w-full rounded-lg sm:rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-neutral-400">
+        Loading location services...
       </div>
     );
   }
