@@ -3,6 +3,7 @@
 import WebLayout from "@/components/web-layout";
 import LocationPicker from "@/components/location-picker";
 import { useAuth } from "@/context/auth-context";
+import { useRouter } from "next/navigation";
 import { Api, API_BASE_URL } from "@/lib/api";
 import DeleteAccountModal from "@/components/delete-account-modal";
 import { useEffect, useState } from "react";
@@ -30,6 +31,7 @@ export default function ProfilePage() {
   }, []);
   
   const { status, user, logout, accessToken, setUser } = useAuth();
+  const router = useRouter();
   const isAuthenticated = status === "authenticated";
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -229,16 +231,30 @@ export default function ProfilePage() {
     return (
       <WebLayout>
         <div className="min-h-[60vh] flex items-center justify-center px-3 sm:px-0">
-          <div className="max-w-md w-full rounded-2xl sm:rounded-3xl border border-neutral-800 bg-neutral-900/40 backdrop-blur p-6 sm:p-8 text-center">
-            <div className="flex h-16 sm:h-20 w-16 sm:w-20 items-center justify-center rounded-full bg-red-500/20 border border-red-500/40 mx-auto mb-4 sm:mb-6">
-              <div className="flex h-12 sm:h-16 w-12 sm:w-16 items-center justify-center rounded-full bg-red-500/40 text-2xl sm:text-3xl font-semibold uppercase text-red-300">
+          <div className="max-w-md w-full rounded-2xl sm:rounded-3xl border border-amber-600/50 bg-amber-500/10 backdrop-blur p-6 sm:p-8 text-center">
+            <div className="flex h-16 sm:h-20 w-16 sm:w-20 items-center justify-center rounded-full bg-amber-500/20 border border-amber-500/40 mx-auto mb-4 sm:mb-6">
+              <div className="flex h-12 sm:h-16 w-12 sm:w-16 items-center justify-center rounded-full bg-amber-500/40 text-2xl sm:text-3xl font-semibold uppercase text-amber-300">
                 ?
               </div>
             </div>
-            <h2 className="text-lg sm:text-2xl font-bold text-white mb-2">Create Your Profile</h2>
-            <p className="text-xs sm:text-sm text-neutral-400 mb-6">
+            <h2 className="text-lg sm:text-2xl font-bold text-amber-400 mb-2">Create Your Profile</h2>
+            <p className="text-xs sm:text-sm text-amber-100/80 mb-6">
               Sign in to build your player profile, connect with other players, and join pickup games.
             </p>
+            <div className="flex gap-3 flex-col">
+              <button
+                onClick={() => router.push("/signup")}
+                className="rounded-lg sm:rounded-xl bg-blue-600 hover:bg-blue-500 px-4 py-2 sm:py-3 font-semibold text-white text-sm sm:text-base transition"
+              >
+                Sign Up
+              </button>
+              <button
+                onClick={() => router.push("/login")}
+                className="rounded-lg sm:rounded-xl bg-green-600 hover:bg-green-500 px-4 py-2 sm:py-3 font-semibold text-white text-sm sm:text-base transition"
+              >
+                Log In
+              </button>
+            </div>
           </div>
         </div>
       </WebLayout>
