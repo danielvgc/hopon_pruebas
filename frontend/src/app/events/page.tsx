@@ -2,8 +2,9 @@
 
 import WebLayout from "@/components/web-layout";
 import { EventCard } from "@/components/event-card";
+import { EventDetailsModal } from "@/components/event-details-modal";
 import * as React from "react";
-import { Api, type HopOnEvent } from "@/lib/api";
+import { Api, type HopOnEvent, type HopOnUser } from "@/lib/api";
 import { useAuth } from "@/context/auth-context";
 
 type TabKey = "joined" | "hosted";
@@ -17,7 +18,9 @@ export default function EventsPage() {
   const [joined, setJoined] = React.useState<HopOnEvent[]>([]);
   const [hosted, setHosted] = React.useState<HopOnEvent[]>([]);
   const [actionEventId, setActionEventId] = React.useState<number | null>(null);
-  const { status, guestTokens, clearGuestToken } = useAuth();
+  const [selectedEventForModal, setSelectedEventForModal] = React.useState<HopOnEvent | null>(null);
+  const [eventParticipants, setEventParticipants] = React.useState<HopOnUser[]>([]);
+  const { status, guestTokens, clearGuestToken, user } = useAuth();
   const isAuthenticated = status === "authenticated";
 
   const loadMyEvents = React.useCallback(async () => {
@@ -42,6 +45,21 @@ export default function EventsPage() {
   React.useEffect(() => {
     void loadMyEvents();
   }, [loadMyEvents]);
+
+  function handleViewEventDetails(event: HopOnEvent) {
+    setSelectedEventForModal(event);
+    setEventParticipants([]);
+  }
+
+  function handleCloseModal() {
+    setSelectedEventForModal(null);
+    setEventParticipants([]);
+  }
+
+  function handleEventDeleted() {
+    handleCloseModal();
+    void loadMyEvents();
+  }
 
   async function handleLeave(eventId: number) {
     if (actionEventId !== null) {
@@ -138,6 +156,7 @@ export default function EventsPage() {
               playersText={`${e.current_players}/${e.max_players}`}
               hostName={e.host?.username}
               description={e.notes || undefined}
+              onViewDetails={() => handleViewEventDetails(e)}
               rightActionLabel={
                 isJoinedTab
                   ? isCurrent
@@ -151,6 +170,22 @@ export default function EventsPage() {
           );
         })}
       </div>
+
+      {/* Event Details Modal */}
+      {selectedEventForModal && (
+        <EventDetailsModal
+          event={selectedEventForModal}
+          isOpen={!!selectedEventForModal}
+          onClose={handleCloseModal}
+          currentUser={user}
+          onEventDeleted={handleEventDeleted}
+          onEventUpdated={() => {
+            handleCloseModal();
+            void loadMyEvents();
+          }}
+          participants={eventParticipants}
+        />
+      )}
     </WebLayout>
   );
 }

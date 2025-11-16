@@ -4,10 +4,12 @@ import WebLayout from "@/components/web-layout";
 import MapDisplay from "@/components/map-display";
 import { UserCard } from "@/components/user-card";
 import { EventCard } from "@/components/event-card";
+import { EventDetailsModal } from "@/components/event-details-modal";
 import { Search } from "lucide-react";
 import { Api, type HopOnEvent, type HopOnUser } from "@/lib/api";
 import { FALLBACK_EVENTS, FALLBACK_PLAYERS } from "@/lib/fallback-data";
 import * as React from "react";
+import { useAuth } from "@/context/auth-context";
 
 type PlayerDisplay = {
   id: string;
@@ -35,6 +37,7 @@ type EventDisplay = {
   hostName?: string | null;
   tagsLower: string[];
   description?: string | null;
+  event?: HopOnEvent; // Reference to actual event for modal
 };
 
 const DEFAULT_FILTER = "Nearby";
@@ -51,6 +54,9 @@ export default function DiscoverPage() {
   const [activeFilter, setActiveFilter] = React.useState(DEFAULT_FILTER);
   const [playerOverrides, setPlayerOverrides] = React.useState<Record<string, boolean>>({});
   const [selectedEventId, setSelectedEventId] = React.useState<number | undefined>();
+  const [selectedEventForModal, setSelectedEventForModal] = React.useState<HopOnEvent | null>(null);
+  const [eventParticipants, setEventParticipants] = React.useState<HopOnUser[]>([]);
+  const { user } = useAuth();
 
   // Fetch players - same for everyone
   React.useEffect(() => {
@@ -61,6 +67,21 @@ export default function DiscoverPage() {
   React.useEffect(() => {
     Api.nearbyEvents().then(setEvents).catch(() => setEvents([]));
   }, []);
+
+  function handleViewEventDetails(event: HopOnEvent) {
+    setSelectedEventForModal(event);
+    setEventParticipants([]);
+  }
+
+  function handleCloseModal() {
+    setSelectedEventForModal(null);
+    setEventParticipants([]);
+  }
+
+  function handleEventDeleted() {
+    handleCloseModal();
+    Api.nearbyEvents().then(setEvents).catch(() => setEvents([]));
+  }
 
   const playerItems = React.useMemo<PlayerDisplay[]>(() => {
     const apiPlayers = players.map((player) => {
@@ -142,6 +163,7 @@ export default function DiscoverPage() {
         hostName: event.host?.username ?? null,
         description: event.notes ?? null,
         tagsLower: [event.sport.toLowerCase()],
+        event, // Include reference to actual event
       };
     });
 
@@ -395,6 +417,7 @@ export default function DiscoverPage() {
                   distanceKm={event.distanceKm ?? undefined}
                   hostName={event.hostName ?? undefined}
                   description={event.description ?? undefined}
+                  onViewDetails={event.event ? () => handleViewEventDetails(event.event!) : undefined}
                   rightActionLabel="View"
                 />
               ))}
@@ -402,6 +425,22 @@ export default function DiscoverPage() {
           )}
         </section>
       </div>
+
+      {/* Event Details Modal */}
+      {selectedEventForModal && (
+        <EventDetailsModal
+          event={selectedEventForModal}
+          isOpen={!!selectedEventForModal}
+          onClose={handleCloseModal}
+          currentUser={user}
+          onEventDeleted={handleEventDeleted}
+          onEventUpdated={() => {
+            handleCloseModal();
+            Api.nearbyEvents().then(setEvents).catch(() => setEvents([]));
+          }}
+          participants={eventParticipants}
+        />
+      )}
     </WebLayout>
   );
 }
