@@ -65,9 +65,21 @@ export default function DiscoverPage() {
 
   const playerItems = React.useMemo<PlayerDisplay[]>(() => {
     const apiPlayers = players.map((player) => {
-        const sports = Array.isArray(player.sports)
-          ? player.sports.filter((sport): sport is string => Boolean(sport))
-          : [];
+        // Normalize sports: ensure it's always a clean array of strings
+        let sports: string[] = [];
+        if (Array.isArray(player.sports)) {
+          sports = player.sports
+            .filter((sport): sport is string => typeof sport === 'string' && Boolean(sport))
+            .map((sport: string) => sport.trim())
+            .filter((sport: string) => sport.length > 0);
+        } else if (typeof player.sports === 'string') {
+          // If it's a string, split by comma
+          sports = (player.sports as string)
+            .split(',')
+            .map((sport: string) => sport.trim())
+            .filter((sport: string) => sport.length > 0);
+        }
+        
         const tagsLower = sports.map((sport) => sport.toLowerCase());
         const eventsCount = player.eventsCount ?? player.events_count ?? undefined;
         const isFollowing = Boolean(
@@ -156,10 +168,16 @@ export default function DiscoverPage() {
   const filters = React.useMemo(() => {
     const sportSet = new Set<string>();
     playerItems.forEach((player) => {
-      player.tags.forEach((tag) => sportSet.add(tag));
+      player.tags.forEach((tag) => {
+        if (typeof tag === 'string' && tag.trim().length > 0) {
+          sportSet.add(tag.trim());
+        }
+      });
     });
     eventItems.forEach((event) => {
-      sportSet.add(event.sport);
+      if (typeof event.sport === 'string' && event.sport.trim().length > 0) {
+        sportSet.add(event.sport.trim());
+      }
     });
     return [DEFAULT_FILTER, ...Array.from(sportSet).sort((a, b) => a.localeCompare(b))];
   }, [playerItems, eventItems]);
