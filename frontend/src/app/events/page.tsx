@@ -166,6 +166,8 @@ export default function EventsPage() {
         {items.map((e) => {
           const isCurrent = actionEventId === e.id;
           const isJoinedTab = tab === "joined";
+          const isHost = !!(user && e.host_user_id === user.id);
+          
           return (
             <EventCard
               key={e.id}
@@ -178,14 +180,14 @@ export default function EventsPage() {
               description={e.notes || undefined}
               onViewDetails={() => handleViewEventDetails(e)}
               rightActionLabel={
-                isJoinedTab
+                isJoinedTab && !isHost
                   ? isCurrent
                     ? "Leaving..."
                     : "Leave"
                   : "View"
               }
-              onRightActionClick={isJoinedTab ? () => handleLeave(e.id) : undefined}
-              disabled={isCurrent || !isJoinedTab}
+              onRightActionClick={isJoinedTab && !isHost ? () => handleLeave(e.id) : undefined}
+              disabled={isCurrent || (isJoinedTab && isHost)}
             />
           );
         })}
