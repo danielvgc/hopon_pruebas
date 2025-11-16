@@ -275,4 +275,5 @@ export default function MapDisplay({
         </div>
       )}
     </div>
-
+  );
+}
