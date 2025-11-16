@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { HopOnEvent } from "@/lib/api";
+import { initializeGoogleMapsLoader } from "@/lib/google-maps-loader";
 
 interface MapDisplayProps {
   events: HopOnEvent[];
@@ -27,21 +28,30 @@ export default function MapDisplay({
   const markersRef = useRef<google.maps.Marker[]>([]);
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Load Google Maps API
+  // Initialize global Google Maps loader
   useEffect(() => {
-    if (!apiKey) return;
-    if (window.google?.maps) {
+    if (!apiKey) {
+      setError("Google Maps API key not configured");
       setLoading(false);
       return;
     }
 
-    const script = document.createElement("script");
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}`;
-    script.async = true;
-    script.defer = true;
-    script.onload = () => setLoading(false);
-    document.head.appendChild(script);
+    initializeGoogleMapsLoader(apiKey)
+      .then(() => {
+        if (window.google?.maps) {
+          setLoading(false);
+          setError(null);
+        } else {
+          setError("Google Maps API failed to initialize");
+          setLoading(false);
+        }
+      })
+      .catch((err) => {
+        setError(`Failed to load Google Maps: ${err.message}`);
+        setLoading(false);
+      });
   }, [apiKey]);
 
   // Initialize map
@@ -177,6 +187,17 @@ export default function MapDisplay({
         style={{ height }}
       >
         <p className="text-xs sm:text-sm text-red-500">Google Maps API key not configured</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div
+        className="w-full bg-neutral-900/50 rounded-lg border border-neutral-700 flex items-center justify-center"
+        style={{ height }}
+      >
+        <p className="text-xs sm:text-sm text-red-500">Map unavailable: {error}</p>
       </div>
     );
   }

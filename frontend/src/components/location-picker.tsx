@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useRef, useEffect, useState, useCallback } from "react";
+import { initializeGoogleMapsLoader } from "@/lib/google-maps-loader";
 
 declare global {
   interface Window {
@@ -37,43 +38,25 @@ export default function LocationPicker({
 
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
-  // Load Google Maps API
+  // Initialize global Google Maps loader
   useEffect(() => {
-    if (!apiKey) return;
-    if (window.google?.maps?.places) {
-      setApiReady(true);
+    if (!apiKey) {
+      setApiError("Google Maps API key not configured");
       return;
     }
 
-    const script = document.createElement("script");
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
-    script.async = true;
-    script.defer = true;
-
-    const handleScriptLoad = () => {
-      // Add small delay to ensure google object is ready
-      setTimeout(() => {
+    initializeGoogleMapsLoader(apiKey)
+      .then(() => {
         if (window.google?.maps?.places) {
           setApiReady(true);
           setApiError(null);
         } else {
           setApiError("Google Maps API failed to initialize");
         }
-      }, 100);
-    };
-
-    const handleScriptError = () => {
-      setApiError("Failed to load Google Maps API");
-    };
-
-    script.addEventListener("load", handleScriptLoad);
-    script.addEventListener("error", handleScriptError);
-    document.head.appendChild(script);
-
-    return () => {
-      script.removeEventListener("load", handleScriptLoad);
-      script.removeEventListener("error", handleScriptError);
-    };
+      })
+      .catch((err) => {
+        setApiError(`Failed to load Google Maps: ${err.message}`);
+      });
   }, [apiKey]);
 
   const handleInputChange = useCallback(
