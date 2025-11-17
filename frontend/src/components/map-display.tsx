@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
+import { MapPin } from "lucide-react";
 import { HopOnEvent } from "@/lib/api";
 import { initializeGoogleMapsLoader } from "@/lib/google-maps-loader";
 
@@ -37,6 +38,13 @@ export default function MapDisplay({
   const [error, setError] = useState<string | null>(null);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<HopOnEvent | null>(null);
+
+  const handleRecenterOnUserLocation = () => {
+    if (userLocation && mapInstanceRef.current) {
+      mapInstanceRef.current.panTo(userLocation);
+      mapInstanceRef.current.setZoom(13);
+    }
+  };
 
   // Initialize global Google Maps loader
   useEffect(() => {
@@ -299,6 +307,17 @@ export default function MapDisplay({
         className="w-full bg-neutral-950"
         style={{ height }}
       />
+
+      {/* Recenter Button */}
+      {userLocation && (
+        <button
+          onClick={handleRecenterOnUserLocation}
+          className="absolute top-4 right-4 bg-white hover:bg-neutral-100 text-neutral-900 rounded-full p-2 sm:p-3 shadow-lg z-20 transition flex items-center justify-center"
+          title="Center map on your location"
+        >
+          <MapPin size={20} strokeWidth={2.5} />
+        </button>
+      )}
       
       {/* Event Info Popup Card */}
       {selectedEvent && (
