@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import WebLayout from "@/components/web-layout";
+import AccountSetupModal from "@/components/account-setup-modal";
 import { useAuth } from "@/context/auth-context";
 
 type SignupMode = "email";
@@ -14,7 +15,7 @@ export default function SignupPage() {
   }, []);
 
   const router = useRouter();
-  const { signup, loginWithGoogle } = useAuth();
+  const { signup, loginWithGoogle, user, status } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -23,6 +24,7 @@ export default function SignupPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [activeMode, setActiveMode] = useState<SignupMode | null>(null);
+  const [showSetupModal, setShowSetupModal] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,8 +55,8 @@ export default function SignupPage() {
 
     try {
       await signup({ email, password, username });
-      // Redirect to setup page - user will see setup form instead of profile
-      router.push("/auth/setup-username");
+      // Show setup modal instead of redirecting
+      setShowSetupModal(true);
     } catch (err: unknown) {
       const errMsg =
         err instanceof Error
@@ -66,13 +68,19 @@ export default function SignupPage() {
     }
   };
 
+  const handleSetupComplete = () => {
+    setShowSetupModal(false);
+    // Redirect to home after setup is complete
+    router.push("/home");
+  };
+
   const handleGoogleSignup = async () => {
     setError("");
     setLoading(true);
     try {
       await loginWithGoogle();
-      // Redirect to setup page - user will see setup form for Google OAuth flow
-      router.push("/auth/setup-username");
+      // Show setup modal instead of redirecting
+      setShowSetupModal(true);
     } catch (err: unknown) {
       const errMsg =
         err instanceof Error ? err.message : "Failed to sign up with Google";
@@ -227,6 +235,12 @@ export default function SignupPage() {
           )}
         </div>
       </div>
+
+      {/* Account Setup Modal */}
+      <AccountSetupModal
+        isOpen={showSetupModal}
+        onComplete={handleSetupComplete}
+      />
     </WebLayout>
   );
 }
