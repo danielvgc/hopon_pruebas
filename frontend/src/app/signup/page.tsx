@@ -66,12 +66,11 @@ export default function SignupPage() {
       console.log("[Signup] Error occurred:", errMsg);
       
       // Check if account already exists and redirect to login
-      if (errMsg.toLowerCase().includes("already exists") || 
-          errMsg.toLowerCase().includes("already registered") ||
-          errMsg.toLowerCase().includes("email already") ||
-          errMsg.toLowerCase().includes("user already") ||
-          errMsg.toLowerCase().includes("exists") ||
-          errMsg.toLowerCase().includes("registered")) {
+      const lowerErr = errMsg.toLowerCase();
+      if (lowerErr.includes("already") || 
+          lowerErr.includes("registered") ||
+          lowerErr.includes("in use") ||
+          lowerErr.includes("taken")) {
         console.log("[Signup] Redirecting to login due to existing account");
         router.push("/login");
         return;
@@ -104,12 +103,11 @@ export default function SignupPage() {
       console.log("[Google Signup] Error occurred:", errMsg);
       
       // Check if account already exists and redirect to login
-      if (errMsg.toLowerCase().includes("already exists") || 
-          errMsg.toLowerCase().includes("already registered") ||
-          errMsg.toLowerCase().includes("email already") ||
-          errMsg.toLowerCase().includes("user already") ||
-          errMsg.toLowerCase().includes("exists") ||
-          errMsg.toLowerCase().includes("registered")) {
+      const lowerErr = errMsg.toLowerCase();
+      if (lowerErr.includes("already") || 
+          lowerErr.includes("registered") ||
+          lowerErr.includes("in use") ||
+          lowerErr.includes("taken")) {
         console.log("[Google Signup] Redirecting to login due to existing account");
         router.push("/login");
         return;
