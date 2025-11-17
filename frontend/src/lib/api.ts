@@ -77,6 +77,9 @@ function buildHeaders(inputHeaders?: HeadersInit, body?: RequestInit["body"]) {
   if (body instanceof FormData) {
     if (accessToken) {
       headers.set("Authorization", `Bearer ${accessToken}`);
+      console.log("[API] FormData: Sending with access token");
+    } else {
+      console.log("[API] FormData: Sending WITHOUT access token (token is null)");
     }
     return headers;
   }
@@ -85,9 +88,9 @@ function buildHeaders(inputHeaders?: HeadersInit, body?: RequestInit["body"]) {
   }
   if (accessToken) {
     headers.set("Authorization", `Bearer ${accessToken}`);
-    console.log("[API] Sending request with access token");
+    console.log("[API] JSON request: Sending with access token (first 30 chars:", accessToken.substring(0, 30), ")");
   } else {
-    console.log("[API] Sending request WITHOUT access token (token is null)");
+    console.log("[API] JSON request: Sending WITHOUT access token (token is null)");
   }
   return headers;
 }

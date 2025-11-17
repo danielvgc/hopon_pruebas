@@ -168,10 +168,15 @@ def create_app() -> Flask:
 
     def decode_token(token: str, expected_type: Optional[str] = None) -> Optional[dict]:
         try:
+            print(f"[DEBUG] Attempting to decode token. Token length: {len(token)}, First 30 chars: {token[:30]}...", flush=True)
+            print(f"[DEBUG] Using JWT_SECRET: {'set' if app.config['JWT_SECRET'] else 'NOT SET'}", flush=True)
             payload = jwt.decode(token, app.config['JWT_SECRET'], algorithms=['HS256'])
-            print(f"[DEBUG] Token decoded successfully. Type: {payload.get('type')}, Sub: {payload.get('sub')}", flush=True)
+            print(f"[DEBUG] Token decoded successfully. Type: {payload.get('type')}, Sub: {payload.get('sub')}, Exp: {payload.get('exp')}", flush=True)
+        except jwt.ExpiredSignatureError as e:
+            print(f"[DEBUG] JWT token EXPIRED: {e}", flush=True)
+            return None
         except jwt.PyJWTError as e:
-            print(f"[DEBUG] JWT decode failed: {e}", flush=True)
+            print(f"[DEBUG] JWT decode failed ({type(e).__name__}): {e}", flush=True)
             return None
         if expected_type and payload.get('type') != expected_type:
             print(f"[DEBUG] Token type mismatch. Expected: {expected_type}, Got: {payload.get('type')}", flush=True)
@@ -322,10 +327,13 @@ def create_app() -> Flask:
     def attach_current_user():
         g.current_user = None
         auth_header = request.headers.get('Authorization', '')
-        print(f"[DEBUG] Request to {request.path} - Auth header present: {bool(auth_header)}", flush=True)
+        print(f"[DEBUG] ==== REQUEST: {request.method} {request.path} ====", flush=True)
+        print(f"[DEBUG] Authorization header present: {bool(auth_header)}", flush=True)
+        if auth_header:
+            print(f"[DEBUG] Auth header value (first 50 chars): {auth_header[:50]}", flush=True)
         if auth_header.startswith('Bearer '):
             token = auth_header.split(' ', 1)[1].strip()
-            print(f"[DEBUG] Token received (first 20 chars): {token[:20]}...", flush=True)
+            print(f"[DEBUG] Token extracted (length: {len(token)}, first 30 chars): {token[:30]}...", flush=True)
             payload = decode_token(token, expected_type='access')
             print(f"[DEBUG] Token validation result: {payload}", flush=True)
             if payload:
@@ -334,6 +342,8 @@ def create_app() -> Flask:
                 if user:
                     g.current_user = user
                     print(f"[DEBUG] Current user set to: {user.username}", flush=True)
+        else:
+            print(f"[DEBUG] No Bearer token in Authorization header", flush=True)
 
     @app.get("/health")
     def health():

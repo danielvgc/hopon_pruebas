@@ -191,8 +191,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     let cancelled = false;
     (async () => {
       try {
+        console.log("[AuthContext] Session check starting...");
+        
         // First, check if there's a pending auth payload from a popup redirect
         const storedPayload = typeof window !== "undefined" ? window.localStorage.getItem(LOCAL_STORAGE_KEYS.authPayload) : null;
+        console.log("[AuthContext] Stored auth payload:", storedPayload ? "found" : "not found");
         if (storedPayload) {
           try {
             const payload = JSON.parse(storedPayload) as {
@@ -203,6 +206,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             if (cancelled) {
               return;
             }
+            console.log("[AuthContext] Using stored auth payload from OAuth");
             applyAuthPayload(payload);
             window.localStorage.removeItem(LOCAL_STORAGE_KEYS.authPayload);
             return;
@@ -216,6 +220,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // This ensures the Authorization header is sent to /auth/session
         if (typeof window !== "undefined") {
           const storedToken = window.localStorage.getItem("hopon_access_token");
+          console.log("[AuthContext] Stored access token in localStorage:", storedToken ? `found (${storedToken.substring(0, 20)}...)` : "not found");
           if (storedToken) {
             console.log("[AuthContext] Restoring stored access token for session check");
             setAccessToken(storedToken);
@@ -223,13 +228,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
 
         // If no stored payload, fetch session from backend
+        console.log("[AuthContext] Calling Api.session()...");
         const result = await Api.session();
+        console.log("[AuthContext] Session result:", result);
         if (cancelled) {
           return;
         }
         if (result?.authenticated && result.user) {
+          console.log("[AuthContext] User authenticated via session, setting user:", result.user.username);
           if (result.access_token) {
+            console.log("[AuthContext] Backend returned new access token, updating token");
             setToken(result.access_token);
+          } else {
+            console.log("[AuthContext] Backend did not return new access token");
           }
           // Preserve needs_username_setup flag if already set (from signup flow)
           const userToSet = user && user.needs_username_setup 
@@ -238,6 +249,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setUser(userToSet);
           setStatus("authenticated");
         } else {
+          console.log("[AuthContext] Session check failed, user not authenticated");
           resetToGuest();
         }
       } catch {
