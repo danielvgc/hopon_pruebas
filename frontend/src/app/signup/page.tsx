@@ -54,7 +54,9 @@ export default function SignupPage() {
     setLoading(true);
 
     try {
+      console.log("[Signup] Starting signup with email:", email);
       await signup({ email, password, username });
+      console.log("[Signup] Signup successful, showing setup modal");
       // Show setup modal instead of redirecting
       setShowSetupModal(true);
     } catch (err: unknown) {
@@ -64,9 +66,13 @@ export default function SignupPage() {
           : "Failed to sign up. Please try again.";
       
       console.log("[Signup] Error occurred:", errMsg);
+      console.log("[Signup] Error type:", typeof err);
+      console.log("[Signup] Full error:", err);
       
       // Check if account already exists and redirect to login
       const lowerErr = errMsg.toLowerCase();
+      console.log("[Signup] Lowercase error:", lowerErr);
+      
       if (lowerErr.includes("already") || 
           lowerErr.includes("registered") ||
           lowerErr.includes("in use") ||
@@ -93,7 +99,9 @@ export default function SignupPage() {
     setError("");
     setLoading(true);
     try {
+      console.log("[Google Signup] Starting Google signup");
       await loginWithGoogle();
+      console.log("[Google Signup] Google signup successful, showing setup modal");
       // Show setup modal instead of redirecting
       setShowSetupModal(true);
     } catch (err: unknown) {
@@ -101,9 +109,13 @@ export default function SignupPage() {
         err instanceof Error ? err.message : "Failed to sign up with Google";
       
       console.log("[Google Signup] Error occurred:", errMsg);
+      console.log("[Google Signup] Error type:", typeof err);
+      console.log("[Google Signup] Full error:", err);
       
       // Check if account already exists and redirect to login
       const lowerErr = errMsg.toLowerCase();
+      console.log("[Google Signup] Lowercase error:", lowerErr);
+      
       if (lowerErr.includes("already") || 
           lowerErr.includes("registered") ||
           lowerErr.includes("in use") ||
