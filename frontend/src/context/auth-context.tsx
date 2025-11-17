@@ -93,6 +93,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       nextStatus = "authenticated";
     }
     if (payload.access_token) {
+      console.log("[AuthContext] applyAuthPayload: Saving token immediately to localStorage and API module");
+      // Save token IMMEDIATELY to localStorage and API module (don't wait for state update)
+      // This ensures the token is persisted before any page navigation happens
+      setAccessToken(payload.access_token);
       setToken(payload.access_token);
       nextStatus = "authenticated";
     }
@@ -261,7 +265,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, [resetToGuest, applyAuthPayload, user]);
+  }, [resetToGuest, applyAuthPayload]);
 
   const loginWithGoogle = React.useCallback(() => {
     if (typeof window === "undefined") {
