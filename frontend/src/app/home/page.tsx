@@ -210,6 +210,12 @@ export default function HomePage() {
             selectedEventId={selectedEventIdOnMap}
             onEventSelect={(event) => setSelectedEventIdOnMap(event.id)}
             height="350px"
+            center={
+              user?.latitude && user?.longitude
+                ? { lat: user.latitude, lng: user.longitude }
+                : undefined
+            }
+            showUserLocation
           />
         </div>
       )}

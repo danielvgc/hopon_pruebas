@@ -10,6 +10,7 @@ interface MapDisplayProps {
   onEventSelect?: (event: HopOnEvent) => void;
   height?: string;
   center?: { lat: number; lng: number };
+  showUserLocation?: boolean;
 }
 
 declare global {
@@ -24,13 +25,17 @@ export default function MapDisplay({
   onEventSelect,
   height = "300px",
   center,
+  showUserLocation = false,
 }: MapDisplayProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<google.maps.Map | null>(null);
   const markersRef = useRef<google.maps.Marker[]>([]);
+  const userLocationMarkerRef = useRef<google.maps.Marker | null>(null);
+  const watchIdRef = useRef<number | null>(null);
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<HopOnEvent | null>(null);
 
   // Initialize global Google Maps loader
@@ -56,6 +61,40 @@ export default function MapDisplay({
         setLoading(false);
       });
   }, [apiKey]);
+
+  // Get real-time user location when showUserLocation is true
+  useEffect(() => {
+    if (!showUserLocation || typeof navigator === "undefined") return;
+
+    if (!navigator.geolocation) {
+      console.warn("Geolocation not supported");
+      return;
+    }
+
+    // Watch user's position
+    const watchId = navigator.geolocation.watchPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        setUserLocation({ lat: latitude, lng: longitude });
+      },
+      (error) => {
+        console.warn("Geolocation error:", error);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0,
+      }
+    );
+
+    watchIdRef.current = watchId;
+
+    return () => {
+      if (watchIdRef.current !== null) {
+        navigator.geolocation.clearWatch(watchIdRef.current);
+      }
+    };
+  }, [showUserLocation]);
 
   // Initialize map
   useEffect(() => {
@@ -190,6 +229,33 @@ export default function MapDisplay({
       markersRef.current.push(marker);
     });
   }, [events, selectedEventId, loading, onEventSelect]);
+
+  // Update user location marker
+  useEffect(() => {
+    if (!showUserLocation || !userLocation || !mapInstanceRef.current || loading || !window.google?.maps) {
+      return;
+    }
+
+    if (!userLocationMarkerRef.current) {
+      // Create user location marker with blue circle style
+      userLocationMarkerRef.current = new window.google.maps.Marker({
+        position: userLocation,
+        map: mapInstanceRef.current,
+        title: "Your Location",
+        icon: {
+          path: window.google.maps.SymbolPath.CIRCLE,
+          scale: 10,
+          fillColor: "#3b82f6",
+          fillOpacity: 1,
+          strokeColor: "#ffffff",
+          strokeWeight: 2,
+        },
+      });
+    } else {
+      // Update existing marker position
+      userLocationMarkerRef.current.setPosition(userLocation);
+    }
+  }, [userLocation, loading, showUserLocation]);
 
   if (!apiKey) {
     return (

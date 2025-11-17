@@ -364,6 +364,7 @@ export default function DiscoverPage() {
                   ? { lat: user.latitude, lng: user.longitude }
                   : undefined
               }
+              showUserLocation
             />
           </section>
         )}
