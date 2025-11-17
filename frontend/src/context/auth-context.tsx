@@ -336,6 +336,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } finally {
       closePopup();
       console.log("[AuthContext] Calling resetToGuest");
+      // Explicitly clear the API module's accessToken to stop sending token in requests
+      setAccessToken(null);
       resetToGuest();
     }
   }, [closePopup, resetToGuest]);
