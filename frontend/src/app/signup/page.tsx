@@ -17,9 +17,9 @@ export default function SignupPage() {
   const router = useRouter();
   const { signup, loginWithGoogle, user, status } = useAuth();
 
-  // If already authenticated, redirect to home
+  // If already authenticated and doesn't need setup, redirect to home
   useEffect(() => {
-    if (status === "authenticated" && user) {
+    if (status === "authenticated" && user && !user.needs_username_setup) {
       console.log("[Signup] User already authenticated, redirecting to home");
       router.push("/home");
     }
@@ -33,6 +33,14 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false);
   const [activeMode, setActiveMode] = useState<SignupMode | null>(null);
   const [showSetupModal, setShowSetupModal] = useState(false);
+
+  // Check if user needs setup (e.g., after Google signup)
+  useEffect(() => {
+    if (status === "authenticated" && user && user.needs_username_setup) {
+      console.log("[Signup] User needs setup, showing modal");
+      setShowSetupModal(true);
+    }
+  }, [status, user]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
