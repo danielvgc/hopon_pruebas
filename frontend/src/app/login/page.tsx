@@ -13,7 +13,15 @@ export default function LoginPage() {
     document.title = "Log In - HopOn";
   }, []);
   const router = useRouter();
-  const { login, loginWithGoogle, loginAsDemo } = useAuth();
+  const { login, loginWithGoogle, loginAsDemo, user, status } = useAuth();
+
+  // If user needs setup, redirect to signup to complete setup
+  useEffect(() => {
+    if (status === "authenticated" && user && user.needs_username_setup) {
+      console.log("[Login] User needs setup, redirecting to signup");
+      router.push("/signup");
+    }
+  }, [status, user, router]);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -63,11 +71,15 @@ export default function LoginPage() {
     setError("");
     setLoading(true);
     try {
+      console.log("[Login] Starting Google login");
       await loginWithGoogle();
+      console.log("[Login] Google login successful");
+      // Will be redirected by useEffect if needs_username_setup
       router.push("/profile");
     } catch (err: unknown) {
       const errMsg =
         err instanceof Error ? err.message : "Failed to log in with Google";
+      console.log("[Login] Google login error:", errMsg);
       setError(errMsg);
     } finally {
       setLoading(false);
