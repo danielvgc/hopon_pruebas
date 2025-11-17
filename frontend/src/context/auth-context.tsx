@@ -58,13 +58,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [guestName, setGuestNameState] = React.useState<string | null>(null);
   const [guestTokens, setGuestTokens] = React.useState<Record<number, string>>({});
   const popupRef = React.useRef<Window | null>(null);
+  const isInitialMount = React.useRef(true);
   const loginResolver = React.useRef<{
     resolve: () => void;
     reject: (reason?: unknown) => void;
   } | null>(null);
 
   // Keep API module in sync with access token.
+  // Don't sync on initial mount to avoid clearing stored token
   React.useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+    console.log("[AuthContext] Token state changed, syncing to API module:", token ? "****" : "null");
     setAccessToken(token);
   }, [token]);
 
