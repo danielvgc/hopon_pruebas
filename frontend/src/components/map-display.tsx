@@ -9,6 +9,7 @@ interface MapDisplayProps {
   selectedEventId?: number;
   onEventSelect?: (event: HopOnEvent) => void;
   height?: string;
+  center?: { lat: number; lng: number };
 }
 
 declare global {
@@ -22,6 +23,7 @@ export default function MapDisplay({
   selectedEventId,
   onEventSelect,
   height = "300px",
+  center,
 }: MapDisplayProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<google.maps.Map | null>(null);
@@ -60,18 +62,25 @@ export default function MapDisplay({
     if (loading || !mapRef.current || !window.google?.maps || events.length === 0) return;
 
     if (!mapInstanceRef.current) {
-      // Calculate center from all events
-      const validEvents = events.filter((e) => e.latitude && e.longitude);
-      if (validEvents.length === 0) return;
+      // Use provided center if available, otherwise calculate from events
+      let mapCenter;
+      
+      if (center && center.lat && center.lng) {
+        mapCenter = center;
+      } else {
+        // Calculate center from all events
+        const validEvents = events.filter((e) => e.latitude && e.longitude);
+        if (validEvents.length === 0) return;
 
-      const center = {
-        lat: validEvents.reduce((sum, e) => sum + (e.latitude || 0), 0) / validEvents.length,
-        lng: validEvents.reduce((sum, e) => sum + (e.longitude || 0), 0) / validEvents.length,
-      };
+        mapCenter = {
+          lat: validEvents.reduce((sum, e) => sum + (e.latitude || 0), 0) / validEvents.length,
+          lng: validEvents.reduce((sum, e) => sum + (e.longitude || 0), 0) / validEvents.length,
+        };
+      }
 
       mapInstanceRef.current = new window.google.maps.Map(mapRef.current, {
         zoom: 13,
-        center,
+        center: mapCenter,
         styles: [
           { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
           { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },

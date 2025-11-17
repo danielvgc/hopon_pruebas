@@ -359,6 +359,11 @@ export default function DiscoverPage() {
               selectedEventId={selectedEventId}
               onEventSelect={(event) => setSelectedEventId(event.id)}
               height="300px"
+              center={
+                user?.latitude && user?.longitude
+                  ? { lat: user.latitude, lng: user.longitude }
+                  : undefined
+              }
             />
           </section>
         )}
