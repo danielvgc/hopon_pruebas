@@ -152,8 +152,15 @@ export default function TopNav() {
                   </div>
                   <button
                     onClick={() => {
-                      logout().catch(() => undefined);
-                      handleNavClick();
+                      console.log("[TopNav] Logout button clicked");
+                      logout().then(() => {
+                        console.log("[TopNav] Logout completed");
+                        handleNavClick();
+                        window.location.href = "/";
+                      }).catch((err) => {
+                        console.error("[TopNav] Logout failed:", err);
+                        handleNavClick();
+                      });
                     }}
                     className="w-full rounded-lg border border-neutral-700 px-4 py-2 text-sm text-neutral-300 hover:border-red-400 hover:text-red-300 transition"
                   >

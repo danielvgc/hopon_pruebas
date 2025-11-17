@@ -311,9 +311,13 @@ export default function ProfilePage() {
             <div className="md:ml-auto flex flex-col gap-2 sm:gap-3 w-full md:w-auto">
               <button
                 onClick={() => {
+                  console.log("[Profile] Logout button clicked");
                   logout().then(() => {
+                    console.log("[Profile] Logout completed, redirecting to /");
                     router.push("/");
-                  }).catch(() => undefined);
+                  }).catch((err) => {
+                    console.error("[Profile] Logout failed:", err);
+                  });
                 }}
                 className="px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg sm:rounded-xl border border-neutral-700 text-xs sm:text-sm text-neutral-300 hover:border-red-400 hover:text-red-300 transition font-medium"
               >
