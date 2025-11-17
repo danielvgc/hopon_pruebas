@@ -313,7 +313,7 @@ export default function MapDisplay({
         <button
           onClick={handleRecenterOnUserLocation}
           className="absolute top-16 bg-white hover:bg-neutral-100 text-neutral-900 rounded-full p-2 sm:p-3 shadow-lg z-20 transition flex items-center justify-center"
-          style={{ right: '20px' }}
+          style={{ right: '10px' }}
           title="Center map on your location"
         >
           <MapPin size={20} strokeWidth={2.5} />
