@@ -4,10 +4,10 @@ import WebLayout from "@/components/web-layout";
 import LocationPicker from "@/components/location-picker";
 import { useAuth } from "@/context/auth-context";
 import { useRouter } from "next/navigation";
-import { Api, API_BASE_URL } from "@/lib/api";
+import { Api, API_BASE_URL, type HopOnEvent } from "@/lib/api";
 import DeleteAccountModal from "@/components/delete-account-modal";
 import { useEffect, useState } from "react";
-import { Calendar, Users, UserCheck, Trophy, Clock, MapPin, X, Check, AlertCircle, Trash2 } from "lucide-react";
+import { Calendar, Users, UserCheck, Trophy, Clock, MapPin, X, Check, AlertCircle, Trash2, Activity } from "lucide-react";
 
 // List of available sports
 const AVAILABLE_SPORTS = [
@@ -36,6 +36,17 @@ export default function ProfilePage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   
+  // Profile stats and activity state
+  const [stats, setStats] = useState({
+    gamesPlayed: 0,
+    following: 0,
+    followers: 0,
+    upcomingGames: 0,
+  });
+  const [recentActivity, setRecentActivity] = useState<HopOnEvent[]>([]);
+  const [upcomingGames, setUpcomingGames] = useState<HopOnEvent[]>([]);
+  const [loadingStats, setLoadingStats] = useState(true);
+  
   // Helper function to normalize sports data
   const normalizeSports = (sports: string[] | string | null | undefined): string[] => {
     if (Array.isArray(sports)) {
@@ -57,6 +68,78 @@ export default function ProfilePage() {
       return "Unknown";
     }
   };
+
+  // Helper function to format event date
+  const formatEventDate = (dateString: string | null | undefined): string => {
+    if (!dateString) return "No date";
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    } catch {
+      return "Invalid date";
+    }
+  };
+
+  // Helper function to check if event is in future
+  const isUpcomingEvent = (eventDate: string | null | undefined): boolean => {
+    if (!eventDate) return false;
+    try {
+      return new Date(eventDate) > new Date();
+    } catch {
+      return false;
+    }
+  };
+
+  // Fetch profile stats and activity
+  const fetchProfileData = async () => {
+    if (!isAuthenticated || !user) return;
+    
+    try {
+      setLoadingStats(true);
+      // Fetch user's events
+      const myEventsData = await Api.myEvents();
+      const allJoinedEvents = myEventsData.joined || [];
+      const allHostedEvents = myEventsData.hosted || [];
+      
+      // Separate upcoming and past events
+      const upcoming = [...allJoinedEvents, ...allHostedEvents]
+        .filter((event) => isUpcomingEvent(event.event_date))
+        .sort((a, b) => new Date(a.event_date || 0).getTime() - new Date(b.event_date || 0).getTime());
+      
+      const recent = [...allJoinedEvents, ...allHostedEvents]
+        .sort((a, b) => new Date(b.event_date || 0).getTime() - new Date(a.event_date || 0).getTime())
+        .slice(0, 5); // Last 5 events
+      
+      setUpcomingGames(upcoming);
+      setRecentActivity(recent);
+      
+      // Calculate stats
+      setStats({
+        gamesPlayed: allJoinedEvents.length + allHostedEvents.length,
+        following: user.is_following ? 1 : 0, // Will be updated properly if we have follower data
+        followers: 0, // Will be updated if we fetch follower data
+        upcomingGames: upcoming.length,
+      });
+    } catch (error) {
+      console.error("Failed to fetch profile data:", error);
+    } finally {
+      setLoadingStats(false);
+    }
+  };
+
+  // Fetch profile data on mount and set up auto-refresh
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchProfileData();
+      
+      // Auto-refresh every 30 seconds
+      const intervalId = setInterval(() => {
+        fetchProfileData();
+      }, 30000);
+      
+      return () => clearInterval(intervalId);
+    }
+  }, [isAuthenticated, user?.id]);
 
   const [editData, setEditData] = useState({
     username: user?.username || "",
@@ -340,7 +423,7 @@ export default function ProfilePage() {
               <h3 className="text-neutral-400 text-sm font-medium">Games Played</h3>
               <Trophy className="w-5 h-5 text-red-400" />
             </div>
-            <p className="text-3xl font-bold text-white">0</p>
+            <p className="text-3xl font-bold text-white">{stats.gamesPlayed}</p>
           </div>
 
           <div className="rounded-lg sm:rounded-2xl border border-neutral-800 bg-neutral-900/40 backdrop-blur p-4 sm:p-6">
@@ -348,7 +431,7 @@ export default function ProfilePage() {
               <h3 className="text-neutral-400 text-xs sm:text-sm font-medium">Following</h3>
               <UserCheck className="w-4 sm:w-5 h-4 sm:h-5 text-red-400" />
             </div>
-            <p className="text-2xl sm:text-3xl font-bold text-white">0</p>
+            <p className="text-2xl sm:text-3xl font-bold text-white">{stats.following}</p>
           </div>
 
           <div className="rounded-lg sm:rounded-2xl border border-neutral-800 bg-neutral-900/40 backdrop-blur p-4 sm:p-6">
@@ -356,7 +439,7 @@ export default function ProfilePage() {
               <h3 className="text-neutral-400 text-xs sm:text-sm font-medium">Followers</h3>
               <Users className="w-4 sm:w-5 h-4 sm:h-5 text-red-400" />
             </div>
-            <p className="text-2xl sm:text-3xl font-bold text-white">0</p>
+            <p className="text-2xl sm:text-3xl font-bold text-white">{stats.followers}</p>
           </div>
 
           <div className="rounded-lg sm:rounded-2xl border border-neutral-800 bg-neutral-900/40 backdrop-blur p-4 sm:p-6">
@@ -364,7 +447,7 @@ export default function ProfilePage() {
               <h3 className="text-neutral-400 text-xs sm:text-sm font-medium">Upcoming</h3>
               <Clock className="w-4 sm:w-5 h-4 sm:h-5 text-red-400" />
             </div>
-            <p className="text-2xl sm:text-3xl font-bold text-white">0</p>
+            <p className="text-2xl sm:text-3xl font-bold text-white">{stats.upcomingGames}</p>
           </div>
         </div>
 
@@ -377,12 +460,33 @@ export default function ProfilePage() {
               <h2 className="text-base sm:text-xl font-bold text-white">Recent Activity</h2>
             </div>
             <div className="space-y-4">
-              {/* Empty state for new users */}
-              <div className="text-center py-8 sm:py-12">
-                <Clock className="w-8 sm:w-12 h-8 sm:h-12 text-neutral-700 mx-auto mb-3 sm:mb-4" />
-                <p className="text-neutral-400 text-sm sm:text-base">No activity yet</p>
-                <p className="text-neutral-500 text-xs sm:text-sm mt-1">Your activity will appear here</p>
-              </div>
+              {recentActivity.length > 0 ? (
+                recentActivity.map((event, index) => (
+                  <div key={event.id} className="flex gap-4 pb-4 border-b border-neutral-700/50 last:border-0 last:pb-0">
+                    <div className="flex-shrink-0">
+                      <div className="w-10 h-10 rounded-full bg-red-500/20 border border-red-500/40 flex items-center justify-center">
+                        <Trophy className="w-5 h-5 text-red-400" />
+                      </div>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white font-medium truncate text-sm sm:text-base">{event.name}</p>
+                      <div className="flex flex-wrap gap-2 mt-1">
+                        <span className="text-neutral-400 text-xs px-2 py-1 rounded-full bg-neutral-800/50">{event.sport}</span>
+                        <span className="text-neutral-400 text-xs px-2 py-1 rounded-full bg-neutral-800/50">
+                          {isUpcomingEvent(event.event_date) ? "Upcoming" : "Past"}
+                        </span>
+                      </div>
+                      <p className="text-neutral-400 text-xs sm:text-sm mt-2">{formatEventDate(event.event_date)}</p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-8 sm:py-12">
+                  <Activity className="w-8 sm:w-12 h-8 sm:h-12 text-neutral-700 mx-auto mb-3 sm:mb-4" />
+                  <p className="text-neutral-400 text-sm sm:text-base">No activity yet</p>
+                  <p className="text-neutral-500 text-xs sm:text-sm mt-1">Your activity will appear here</p>
+                </div>
+              )}
             </div>
           </div>
 
@@ -420,12 +524,75 @@ export default function ProfilePage() {
             <h2 className="text-base sm:text-xl font-bold text-white">Your Upcoming Games</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Empty state for new users */}
-            <div className="col-span-full text-center py-8 sm:py-12">
-              <Trophy className="w-8 sm:w-12 h-8 sm:h-12 text-neutral-700 mx-auto mb-3 sm:mb-4" />
-              <p className="text-neutral-400 text-sm sm:text-base">No upcoming games yet</p>
-              <p className="text-neutral-500 text-xs sm:text-sm mt-1">Join or create games to see them here</p>
-            </div>
+            {upcomingGames.length > 0 ? (
+              upcomingGames.map((event) => (
+                <div
+                  key={event.id}
+                  className="rounded-xl border border-neutral-700 bg-neutral-800/40 hover:bg-neutral-800/60 backdrop-blur p-4 transition group cursor-pointer"
+                >
+                  {/* Header with sport and status */}
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex-1">
+                      <h3 className="text-white font-bold text-sm sm:text-base group-hover:text-red-400 transition truncate">
+                        {event.name}
+                      </h3>
+                      <div className="flex gap-2 flex-wrap mt-2">
+                        <span className="inline-block px-2.5 py-1 rounded-full bg-red-500/20 border border-red-500/40 text-red-300 text-xs font-medium">
+                          {event.sport}
+                        </span>
+                        {event.skill_level && (
+                          <span className="inline-block px-2.5 py-1 rounded-full bg-yellow-500/20 border border-yellow-500/40 text-yellow-300 text-xs font-medium">
+                            {event.skill_level}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Date and Time */}
+                  <div className="flex items-center gap-2 text-neutral-300 text-xs sm:text-sm mb-3 pb-3 border-b border-neutral-700/50">
+                    <Calendar className="w-4 h-4 flex-shrink-0 text-red-400" />
+                    <span>{formatEventDate(event.event_date)}</span>
+                  </div>
+
+                  {/* Location */}
+                  {event.location && (
+                    <div className="flex items-center gap-2 text-neutral-300 text-xs sm:text-sm mb-3">
+                      <MapPin className="w-4 h-4 flex-shrink-0 text-red-400" />
+                      <span className="truncate">{event.location}</span>
+                    </div>
+                  )}
+
+                  {/* Players Count */}
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="flex items-center gap-1 text-neutral-300 text-xs sm:text-sm">
+                      <Users className="w-4 h-4 text-red-400" />
+                      <span>
+                        {event.current_players}/{event.max_players} players
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Notes if available */}
+                  {event.notes && (
+                    <div className="text-neutral-400 text-xs italic mb-3 line-clamp-2">
+                      "{event.notes}"
+                    </div>
+                  )}
+
+                  {/* View Details Button */}
+                  <button className="w-full mt-2 px-3 py-2 rounded-lg bg-red-500/20 border border-red-500/40 text-red-300 text-xs sm:text-sm font-medium hover:bg-red-500/30 hover:border-red-500/60 transition">
+                    View Details
+                  </button>
+                </div>
+              ))
+            ) : (
+              <div className="col-span-full text-center py-8 sm:py-12">
+                <Trophy className="w-8 sm:w-12 h-8 sm:h-12 text-neutral-700 mx-auto mb-3 sm:mb-4" />
+                <p className="text-neutral-400 text-sm sm:text-base">No upcoming games yet</p>
+                <p className="text-neutral-500 text-xs sm:text-sm mt-1">Join or create games to see them here</p>
+              </div>
+            )}
           </div>
         </div>
 
