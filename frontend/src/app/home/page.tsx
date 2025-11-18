@@ -34,8 +34,10 @@ export default function HomePage() {
   const loadData = React.useCallback(async () => {
     try {
       console.log("Loading nearby events...");
-      const nearby = await Api.nearbyEvents();
-      console.log("Nearby events loaded:", nearby);
+      // Pass user's location for distance-based sorting
+      const params = user?.latitude && user?.longitude ? { lat: user.latitude, lng: user.longitude } : undefined;
+      const nearby = await Api.nearbyEvents(params);
+      console.log("Nearby events loaded (sorted by distance):", nearby);
       let joined: HopOnEvent[] = [];
       let hosted: HopOnEvent[] = [];
       if (status === "authenticated") {
@@ -57,7 +59,7 @@ export default function HomePage() {
       setHostedEvents([]);
       setErrorMessage("Couldn't load events. Check your connection and try again.");
     }
-  }, [status]);
+  }, [status, user?.latitude, user?.longitude]);
 
   const availableSports = React.useMemo(() => {
     const sportsSource =

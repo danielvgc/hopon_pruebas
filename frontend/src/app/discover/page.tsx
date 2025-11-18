@@ -66,7 +66,9 @@ export default function DiscoverPage() {
   // Fetch events - same for everyone, with auto-refresh every 30 seconds
   React.useEffect(() => {
     const fetchEvents = () => {
-      Api.nearbyEvents().then(setEvents).catch(() => setEvents([]));
+      // Pass user's location for distance-based sorting
+      const params = user?.latitude && user?.longitude ? { lat: user.latitude, lng: user.longitude } : undefined;
+      Api.nearbyEvents(params).then(setEvents).catch(() => setEvents([]));
     };
 
     // Fetch immediately on mount
@@ -77,7 +79,7 @@ export default function DiscoverPage() {
 
     // Cleanup interval on unmount
     return () => clearInterval(intervalId);
-  }, []);
+  }, [user?.latitude, user?.longitude]);
 
   function handleViewEventDetails(event: HopOnEvent) {
     setSelectedEventForModal(event);
@@ -102,7 +104,9 @@ export default function DiscoverPage() {
 
   function handleEventDeleted() {
     handleCloseModal();
-    Api.nearbyEvents().then(setEvents).catch(() => setEvents([]));
+    // Refetch events with user's location for distance-based sorting
+    const params = user?.latitude && user?.longitude ? { lat: user.latitude, lng: user.longitude } : undefined;
+    Api.nearbyEvents(params).then(setEvents).catch(() => setEvents([]));
   }
 
   const playerItems = React.useMemo<PlayerDisplay[]>(() => {
@@ -464,7 +468,9 @@ export default function DiscoverPage() {
           onEventDeleted={handleEventDeleted}
           onEventUpdated={() => {
             handleCloseModal();
-            Api.nearbyEvents().then(setEvents).catch(() => setEvents([]));
+            // Refetch events with user's location for distance-based sorting
+            const params = user?.latitude && user?.longitude ? { lat: user.latitude, lng: user.longitude } : undefined;
+            Api.nearbyEvents(params).then(setEvents).catch(() => setEvents([]));
           }}
           participants={eventParticipants}
         />
