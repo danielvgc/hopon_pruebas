@@ -57,6 +57,8 @@ export default function DiscoverPage() {
   const [selectedEventId, setSelectedEventId] = React.useState<number | undefined>();
   const [selectedEventForModal, setSelectedEventForModal] = React.useState<HopOnEvent | null>(null);
   const [eventParticipants, setEventParticipants] = React.useState<HopOnUser[]>([]);
+  const [joinedSet, setJoinedSet] = React.useState<Set<number>>(new Set());
+  const [pendingAction, setPendingAction] = React.useState<{ id: number; type: "join" | "leave" } | null>(null);
   const { user } = useAuth();
   
   // Get user's real-time location, fallback to profile location
@@ -91,6 +93,23 @@ export default function DiscoverPage() {
     // Cleanup interval on unmount
     return () => clearInterval(intervalId);
   }, [location, user?.latitude, user?.longitude]);
+
+  // Fetch user's joined events on mount
+  React.useEffect(() => {
+    if (!user) {
+      setJoinedSet(new Set());
+      return;
+    }
+    Api.myEvents()
+      .then((data) => {
+        const joined = new Set([
+          ...data.joined.map((event: HopOnEvent) => event.id),
+          ...data.hosted.map((event: HopOnEvent) => event.id),
+        ]);
+        setJoinedSet(joined);
+      })
+      .catch(() => setJoinedSet(new Set()));
+  }, [user]);
 
   function handleViewEventDetails(event: HopOnEvent) {
     setSelectedEventForModal(event);
@@ -343,6 +362,40 @@ export default function DiscoverPage() {
     []
   );
 
+  const handleJoin = React.useCallback(async (eventId: number) => {
+    if (!user) return;
+    if (pendingAction !== null) return;
+    setPendingAction({ id: eventId, type: "join" });
+    try {
+      await Api.joinEvent(eventId, {
+        player_name: user.username,
+      });
+      setJoinedSet((prev) => new Set([...prev, eventId]));
+    } catch (error) {
+      console.error("Failed to join event:", error);
+    } finally {
+      setPendingAction(null);
+    }
+  }, [user, pendingAction]);
+
+  const handleLeave = React.useCallback(async (eventId: number) => {
+    if (!user) return;
+    if (pendingAction !== null) return;
+    setPendingAction({ id: eventId, type: "leave" });
+    try {
+      await Api.leaveEvent(eventId, {});
+      setJoinedSet((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(eventId);
+        return newSet;
+      });
+    } catch (error) {
+      console.error("Failed to leave event:", error);
+    } finally {
+      setPendingAction(null);
+    }
+  }, [user, pendingAction]);
+
   return (
     <WebLayout title="Discover">
       <div className="space-y-3 sm:space-y-4">
@@ -448,22 +501,43 @@ export default function DiscoverPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-2">
-              {filteredEvents.map((event) => (
-                <EventCard
-                  key={event.id}
-                  title={event.title}
-                  sport={event.sport}
-                  level={event.level ?? undefined}
-                  location={event.location}
-                  datetime={event.datetime ?? undefined}
-                  playersText={event.playersText}
-                  distanceKm={event.distanceKm ?? undefined}
-                  hostName={event.hostName ?? undefined}
-                  description={event.description ?? undefined}
-                  onViewDetails={event.event ? () => handleViewEventDetails(event.event!) : undefined}
-                  rightActionLabel="View"
-                />
-              ))}
+              {filteredEvents.map((event) => {
+                const isHost = event.event?.host_user_id === user?.id;
+                const isJoined = joinedSet.has(event.event?.id || 0);
+                const isCurrent = pendingAction?.id === event.event?.id;
+
+                return (
+                  <EventCard
+                    key={event.id}
+                    title={event.title}
+                    sport={event.sport}
+                    level={event.level ?? undefined}
+                    location={event.location}
+                    datetime={event.datetime ?? undefined}
+                    playersText={event.playersText}
+                    distanceKm={event.distanceKm ?? undefined}
+                    hostName={event.hostName ?? undefined}
+                    description={event.description ?? undefined}
+                    onViewDetails={event.event ? () => handleViewEventDetails(event.event!) : undefined}
+                    onRightActionClick={
+                      isJoined && !isHost
+                        ? () => handleLeave(event.event!.id)
+                        : isJoined ? undefined
+                        : event.event ? () => handleJoin(event.event!.id) : undefined
+                    }
+                    rightActionLabel={(() => {
+                      if (isJoined) {
+                        if (isHost) {
+                          return "Host";
+                        }
+                        return isCurrent && pendingAction?.type === "leave" ? "Leaving..." : "Leave";
+                      }
+                      return isCurrent && pendingAction?.type === "join" ? "Joining..." : "Join";
+                    })()}
+                    disabled={isCurrent || isHost}
+                  />
+                );
+              })}
             </div>
           )}
         </section>
