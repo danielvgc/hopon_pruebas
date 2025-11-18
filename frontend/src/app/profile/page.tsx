@@ -8,6 +8,7 @@ import { Api, API_BASE_URL, type HopOnEvent } from "@/lib/api";
 import DeleteAccountModal from "@/components/delete-account-modal";
 import { useEffect, useState } from "react";
 import { Calendar, Users, UserCheck, Trophy, Clock, MapPin, X, Check, AlertCircle, Trash2, Activity } from "lucide-react";
+import { useCallback } from "react";
 
 // List of available sports
 const AVAILABLE_SPORTS = [
@@ -45,7 +46,6 @@ export default function ProfilePage() {
   });
   const [recentActivity, setRecentActivity] = useState<HopOnEvent[]>([]);
   const [upcomingGames, setUpcomingGames] = useState<HopOnEvent[]>([]);
-  const [loadingStats, setLoadingStats] = useState(true);
   
   // Helper function to normalize sports data
   const normalizeSports = (sports: string[] | string | null | undefined): string[] => {
@@ -91,11 +91,10 @@ export default function ProfilePage() {
   };
 
   // Fetch profile stats and activity
-  const fetchProfileData = async () => {
+  const fetchProfileData = useCallback(async () => {
     if (!isAuthenticated || !user) return;
     
     try {
-      setLoadingStats(true);
       // Fetch user's events
       const myEventsData = await Api.myEvents();
       const allJoinedEvents = myEventsData.joined || [];
@@ -122,10 +121,8 @@ export default function ProfilePage() {
       });
     } catch (error) {
       console.error("Failed to fetch profile data:", error);
-    } finally {
-      setLoadingStats(false);
     }
-  };
+  }, [isAuthenticated, user]);
 
   // Fetch profile data on mount and set up auto-refresh
   useEffect(() => {
@@ -139,7 +136,7 @@ export default function ProfilePage() {
       
       return () => clearInterval(intervalId);
     }
-  }, [isAuthenticated, user?.id]);
+  }, [isAuthenticated, fetchProfileData]);
 
   const [editData, setEditData] = useState({
     username: user?.username || "",
@@ -461,7 +458,7 @@ export default function ProfilePage() {
             </div>
             <div className="space-y-4">
               {recentActivity.length > 0 ? (
-                recentActivity.map((event, index) => (
+                recentActivity.map((event) => (
                   <div key={event.id} className="flex gap-4 pb-4 border-b border-neutral-700/50 last:border-0 last:pb-0">
                     <div className="flex-shrink-0">
                       <div className="w-10 h-10 rounded-full bg-red-500/20 border border-red-500/40 flex items-center justify-center">
@@ -576,7 +573,7 @@ export default function ProfilePage() {
                   {/* Notes if available */}
                   {event.notes && (
                     <div className="text-neutral-400 text-xs italic mb-3 line-clamp-2">
-                      "{event.notes}"
+                      &quot;{event.notes}&quot;
                     </div>
                   )}
 
