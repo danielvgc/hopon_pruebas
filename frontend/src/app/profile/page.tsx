@@ -100,21 +100,27 @@ export default function ProfilePage() {
       const allJoinedEvents = myEventsData.joined || [];
       const allHostedEvents = myEventsData.hosted || [];
       
+      // Deduplicate events by ID (in case user hosted and joined the same event)
+      const eventMap = new Map<number, HopOnEvent>();
+      allJoinedEvents.forEach((event) => eventMap.set(event.id, event));
+      allHostedEvents.forEach((event) => eventMap.set(event.id, event));
+      const allUniqueEvents = Array.from(eventMap.values());
+      
       // Separate upcoming and past events
-      const upcoming = [...allJoinedEvents, ...allHostedEvents]
+      const upcoming = allUniqueEvents
         .filter((event) => isUpcomingEvent(event.event_date))
         .sort((a, b) => new Date(a.event_date || 0).getTime() - new Date(b.event_date || 0).getTime());
       
-      const recent = [...allJoinedEvents, ...allHostedEvents]
+      const recent = allUniqueEvents
         .sort((a, b) => new Date(b.event_date || 0).getTime() - new Date(a.event_date || 0).getTime())
         .slice(0, 5); // Last 5 events
       
       setUpcomingGames(upcoming);
       setRecentActivity(recent);
       
-      // Calculate stats
+      // Calculate stats - use unique events count for gamesPlayed
       setStats({
-        gamesPlayed: allJoinedEvents.length + allHostedEvents.length,
+        gamesPlayed: allUniqueEvents.length,
         following: user.is_following ? 1 : 0, // Will be updated properly if we have follower data
         followers: 0, // Will be updated if we fetch follower data
         upcomingGames: upcoming.length,
