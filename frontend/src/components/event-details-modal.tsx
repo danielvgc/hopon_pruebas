@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { X, MapPin, Users, Edit2, Trash2 } from "lucide-react";
 import { HopOnEvent, HopOnUser, Api } from "@/lib/api";
 import { getSportEmoji } from "@/lib/sports-emoji";
@@ -31,6 +31,14 @@ export function EventDetailsModal({
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [editError, setEditError] = useState<string | null>(null);
+  
+  // Log participants when they change for debugging
+  useEffect(() => {
+    console.log("[EventDetailsModal] Participants updated:", participants);
+    participants.forEach((p) => {
+      console.log("[EventDetailsModal] Participant:", { id: p.id, username: p.username, email: p.email });
+    });
+  }, [participants]);
   
   // Edit form state
   const [editForm, setEditForm] = useState({

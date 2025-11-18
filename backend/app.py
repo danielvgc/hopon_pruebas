@@ -1309,14 +1309,23 @@ def create_app() -> Flask:
         event = Event.query.get_or_404(event_id)
         participants = EventParticipant.query.filter_by(event_id=event_id).all()
         
+        print(f"[HOPON] Fetching participants for event {event_id}")
+        print(f"[HOPON] Found {len(participants)} event participant records")
+        
         # Get the actual user objects for participants who are registered users
         users = []
         for participant in participants:
+            print(f"[HOPON] Participant record: user_id={participant.user_id}, player_name={participant.player_name}")
             if participant.user_id:
                 user = User.query.get(participant.user_id)
                 if user:
-                    users.append(user.to_dict())
+                    user_dict = user.to_dict()
+                    print(f"[HOPON] Found user: {user_dict}")
+                    users.append(user_dict)
+                else:
+                    print(f"[HOPON] User with ID {participant.user_id} not found")
         
+        print(f"[HOPON] Returning {len(users)} users")
         return jsonify({
             'participants': users
         }), 200

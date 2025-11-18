@@ -104,6 +104,8 @@ export default function HomePage() {
     try {
       // Fetch participants for this event
       const result = await Api.getEventParticipants(event.id);
+      console.log("[Home] Event participants response:", result);
+      console.log("[Home] Participants array:", result.participants);
       setEventParticipants(result.participants || []);
     } catch (error) {
       console.error("Failed to load event participants:", error);
