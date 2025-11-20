@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Api, HopOnUser, registerUnauthorizedHandler, setAccessToken, API_BASE_URL } from "@/lib/api";
+import { initializeGlobalErrorHandler } from "@/lib/error-handler";
 
 type AuthStatus = "loading" | "authenticated" | "guest";
 
@@ -63,6 +64,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     resolve: () => void;
     reject: (reason?: unknown) => void;
   } | null>(null);
+
+  // Initialize global error handler on mount
+  React.useEffect(() => {
+    initializeGlobalErrorHandler();
+  }, []);
 
   // Keep API module in sync with access token.
   // Don't sync on initial mount to avoid clearing stored token

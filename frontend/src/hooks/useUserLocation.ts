@@ -11,6 +11,8 @@ interface LocationCoords {
  * - User denies permission
  * - Geolocation not supported
  * - Error occurs
+ * 
+ * Note: Mobile Safari requires user interaction to request geolocation
  */
 export function useUserLocation(profileLocation?: { lat?: number; lng?: number } | null) {
   const [location, setLocation] = useState<LocationCoords | null>(null);
@@ -24,59 +26,77 @@ export function useUserLocation(profileLocation?: { lat?: number; lng?: number }
       return;
     }
 
-    if (typeof navigator === "undefined") {
-      // Fallback to profile location if not in browser
-      if (profileLocation?.lat && profileLocation?.lng) {
-        setLocation({ lat: profileLocation.lat, lng: profileLocation.lng });
-      }
-      setIsLoadingLocation(false);
-      return;
-    }
-
-    if (!navigator.geolocation) {
-      console.warn("Geolocation not supported, using profile location");
-      // Fallback to profile location
-      if (profileLocation?.lat && profileLocation?.lng) {
-        setLocation({ lat: profileLocation.lat, lng: profileLocation.lng });
-      }
-      setIsLoadingLocation(false);
-      permissionCheckedRef.current = true;
-      return;
-    }
-
-    // Try to get current position (this will prompt for permission on first call)
-    const watchId = navigator.geolocation.watchPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords;
-        console.log("[useUserLocation] Got real-time location:", latitude, longitude);
-        setLocation({ lat: latitude, lng: longitude });
-        setIsLoadingLocation(false);
-        permissionCheckedRef.current = true;
-      },
-      (error) => {
-        console.warn("[useUserLocation] Geolocation error:", error);
-        // Fallback to profile location on error
+    try {
+      if (typeof navigator === "undefined") {
+        // Fallback to profile location if not in browser
         if (profileLocation?.lat && profileLocation?.lng) {
-          console.log("[useUserLocation] Falling back to profile location");
+          setLocation({ lat: profileLocation.lat, lng: profileLocation.lng });
+        }
+        setIsLoadingLocation(false);
+        return;
+      }
+
+      if (!navigator.geolocation) {
+        console.warn("[useUserLocation] Geolocation not supported, using profile location");
+        // Fallback to profile location
+        if (profileLocation?.lat && profileLocation?.lng) {
           setLocation({ lat: profileLocation.lat, lng: profileLocation.lng });
         }
         setIsLoadingLocation(false);
         permissionCheckedRef.current = true;
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 5000,
-        maximumAge: 0,
+        return;
       }
-    );
 
-    watchIdRef.current = watchId;
+      // Try to get current position (this will prompt for permission on first call)
+      const watchId = navigator.geolocation.watchPosition(
+        (position) => {
+          try {
+            const { latitude, longitude } = position.coords;
+            console.log("[useUserLocation] Got real-time location:", latitude, longitude);
+            setLocation({ lat: latitude, lng: longitude });
+            setIsLoadingLocation(false);
+            permissionCheckedRef.current = true;
+          } catch (err) {
+            console.error("[useUserLocation] Error processing position:", err);
+            fallbackToProfileLocation();
+          }
+        },
+        (error) => {
+          console.warn("[useUserLocation] Geolocation error:", error.code, error.message);
+          // Fallback to profile location on error
+          fallbackToProfileLocation();
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000, // Increased timeout for mobile
+          maximumAge: 30000, // Cache position for 30 seconds
+        }
+      );
 
-    return () => {
-      if (watchIdRef.current !== null) {
-        navigator.geolocation.clearWatch(watchIdRef.current);
+      watchIdRef.current = watchId;
+
+      return () => {
+        if (watchIdRef.current !== null) {
+          try {
+            navigator.geolocation.clearWatch(watchIdRef.current);
+          } catch (err) {
+            console.warn("[useUserLocation] Error clearing watch:", err);
+          }
+        }
+      };
+    } catch (err) {
+      console.error("[useUserLocation] Unexpected error in useEffect:", err);
+      fallbackToProfileLocation();
+    }
+
+    function fallbackToProfileLocation() {
+      if (profileLocation?.lat && profileLocation?.lng) {
+        console.log("[useUserLocation] Falling back to profile location:", profileLocation);
+        setLocation({ lat: profileLocation.lat, lng: profileLocation.lng });
       }
-    };
+      setIsLoadingLocation(false);
+      permissionCheckedRef.current = true;
+    }
   }, [profileLocation?.lat, profileLocation?.lng]);
 
   return { location, isLoadingLocation };
