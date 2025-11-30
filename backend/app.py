@@ -819,20 +819,22 @@ def create_app() -> Flask:
         try:
             print(f"[HOPON] Starting account deletion for {user_email} (ID: {user_id})", flush=True)
             
-            # Delete all events hosted by this user
+            # Step 1: Delete all event participations first (via cascade)
+            print(f"[HOPON] Deleting event participations via cascade...", flush=True)
+            # The cascade relationship on User.events_joined should handle this automatically
+            
+            # Step 2: Delete all events hosted by this user
             print(f"[HOPON] Deleting hosted events...", flush=True)
-            Event.query.filter_by(host_user_id=user_id).delete()
+            hosted_events = Event.query.filter_by(host_user_id=user_id).all()
+            for event in hosted_events:
+                db.session.delete(event)
             
-            # Delete all event participations (cascade handles this, but explicit for clarity)
-            print(f"[HOPON] Deleting event participations...", flush=True)
-            EventParticipant.query.filter_by(user_id=user_id).delete()
-            
-            # Delete all follow relationships (both as follower and followee)
+            # Step 3: Delete all follow relationships (manual because no cascade)
             print(f"[HOPON] Deleting follow relationships...", flush=True)
             Follow.query.filter_by(follower_id=user_id).delete()
             Follow.query.filter_by(followee_id=user_id).delete()
             
-            # Delete the user
+            # Step 4: Delete the user (this will trigger cascades)
             print(f"[HOPON] Deleting user record...", flush=True)
             db.session.delete(g.current_user)
             
