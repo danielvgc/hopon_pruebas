@@ -817,21 +817,29 @@ def create_app() -> Flask:
         user_email = g.current_user.email
         
         try:
+            print(f"[HOPON] Starting account deletion for {user_email} (ID: {user_id})", flush=True)
+            
             # Delete all events hosted by this user
+            print(f"[HOPON] Deleting hosted events...", flush=True)
             Event.query.filter_by(host_user_id=user_id).delete()
             
             # Delete all event participations (cascade handles this, but explicit for clarity)
+            print(f"[HOPON] Deleting event participations...", flush=True)
             EventParticipant.query.filter_by(user_id=user_id).delete()
             
             # Delete all follow relationships (both as follower and followee)
+            print(f"[HOPON] Deleting follow relationships...", flush=True)
             Follow.query.filter_by(follower_id=user_id).delete()
             Follow.query.filter_by(followee_id=user_id).delete()
             
             # Delete the user
+            print(f"[HOPON] Deleting user record...", flush=True)
             db.session.delete(g.current_user)
+            
+            print(f"[HOPON] Committing changes...", flush=True)
             db.session.commit()
             
-            print(f"[HOPON] User account deleted: {user_email} (ID: {user_id})", flush=True)
+            print(f"[HOPON] User account deleted successfully: {user_email} (ID: {user_id})", flush=True)
             
             # Clear cookies and return success response
             response = make_response(jsonify({'message': 'Account deleted successfully'}), 200)
@@ -848,8 +856,11 @@ def create_app() -> Flask:
             
         except Exception as e:
             db.session.rollback()
-            print(f"[HOPON] Error deleting account for {user_email}: {str(e)}", flush=True)
-            return jsonify({'error': 'Failed to delete account'}), 500
+            error_msg = f"[HOPON] Error deleting account for {user_email}: {str(e)}"
+            print(error_msg, flush=True)
+            import traceback
+            print(traceback.format_exc(), flush=True)
+            return jsonify({'error': 'Failed to delete account', 'details': str(e)}), 500
 
     @app.get("/auth/session")
     def session_info():
